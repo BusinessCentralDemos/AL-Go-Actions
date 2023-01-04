@@ -57,6 +57,12 @@ outputs:
   ProjectCount:
     description: Number of projects in array
     value: ${{ steps.readsettings.outputs.ProjectCount }}
+  PpsProjectsJson:
+    description: Projects with Power Platform Solution in compressed Json format
+    value: ${{ steps.readsettings.outputs.ProjectsJson }}
+  PpsProjectCount:
+    description: Number of projects with Power Platform Solution in array
+    value: ${{ steps.readsettings.outputs.ProjectCount }}
   EnvironmentsJson:
     description: Environments in compressed Json format
     value: ${{ steps.readsettings.outputs.EnvironmentsJson }}

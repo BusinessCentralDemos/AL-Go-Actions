@@ -207,13 +207,8 @@ try {
         # Locate Projects with Power Platform solutions
         $ppsProjects = @($buildProjects | Where-Object { 
             $projectPath = Join-Path $ENV:GITHUB_WORKSPACE $_
-            Write-Host $projectPath
             $settings = ReadSettings -baseFolder $projectPath -workflowName $env:GITHUB_WORKFLOW
-            $settings | ConvertTo-Json | Out-Host
             $settings = AnalyzeRepo -settings $settings -token $token -baseFolder $ENV:GITHUB_WORKSPACE -project $_ -doNotIssueWarnings -doNotCheckArtifactSetting -server_url $ENV:GITHUB_SERVER_URL -repository $ENV:GITHUB_REPOSITORY
-            $settings | ConvertTo-Json | Out-Host
-            $settings.GetType() | Out-Host
-            $settings.Count | Out-Host
             $settings.PpSolutionFolder -ne ""
         })
 

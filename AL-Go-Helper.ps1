@@ -399,8 +399,7 @@ function ReadSettings {
         "testDependencies"                       = @()
         "testFolders"                            = @()
         "bcptTestFolders"                        = @()
-        "ppSolutionFolder"                       = ""
-        "ppSolutionType"                         = "Unmanaged"
+        "powerPlatformSolutionFolder"             = ""
         "installApps"                            = @()
         "installTestApps"                        = @()
         "installOnlyReferencedApps"              = $true
@@ -571,12 +570,12 @@ function AnalyzeRepo {
         throw "The type, specified in $ALGoSettingsFile, must be either 'Per Tenant Extension' or 'AppSource App'. It is '$($settings.type)'."
     }
 
-    if (-not (@($settings.appFolders)+@($settings.testFolders)+@($settings.bcptTestFolders)+@($settings.ppSolutionFolder))) {
+    if (-not (@($settings.appFolders)+@($settings.testFolders)+@($settings.bcptTestFolders)+@($settings.powerPlatformSolutionFolder))) {
         Get-ChildItem -Path $projectPath | Where-Object { $_.PSIsContainer -and (Test-Path -Path (Join-Path $_.FullName "Other/Solution.xml")) } | ForEach-Object {
-            if ($settings.ppSolutionFolder) {
+            if ($settings.powerPlatformSolutionFolder) {
                 throw "More than one Power Platform solution found in the project. Please specify the Power Platform solution folder in .AL-Go/settings.json"
             }
-            $settings.ppsolutionFolder = $_.Name
+            $settings.powerPlatformSolutionFolder = $_.Name
         }
         Get-ChildItem -Path $projectPath | Where-Object { $_.PSIsContainer -and (Test-Path -Path (Join-Path $_.FullName "app.json")) } | ForEach-Object {
             $folder = $_
@@ -611,9 +610,9 @@ function AnalyzeRepo {
         }
     }
 
-    if ($settings.ppSolutionFolder) {
+    if ($settings.powerPlatformSolutionFolder) {
         Write-Host "Checking Power Platform solution folder"
-        # TODO: Check PpSolutionFolder
+        # TODO: Check PowerPlatformSolutionFolder
     }
     Write-Host "Checking appFolders and testFolders"
     $dependencies = [ordered]@{}
@@ -1014,7 +1013,7 @@ function Get-ProjectFolders {
     $settings = AnalyzeRepo -settings $settings -token $token -baseFolder $baseFolder -project $project -includeOnlyAppIds $includeOnlyAppIds -doNotIssueWarnings -doNotCheckArtifactSetting -server_url $server_url -repository $repository -workflowName $workflowName
     $AddFolderArr = @()
     if ($includeALGoFolder) { $AddFolderArr = @(".AL-Go") }
-    if ($settings.ppSolutionFolder) { $AddFolderArr += @($settings.ppSolutionFolder) }
+    if ($settings.powerPlatformSolutionFolder) { $AddFolderArr += @($settings.powerPlatformSolutionFolder) }
     Set-Location $baseFolder
     @($settings.appFolders + $settings.testFolders + $settings.bcptTestFolders + $AddFolderArr) | ForEach-Object {
         $fullPath = Join-Path $projectPath $_ -Resolve

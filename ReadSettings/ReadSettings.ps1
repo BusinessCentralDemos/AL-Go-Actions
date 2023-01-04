@@ -204,14 +204,6 @@ try {
             $buildProjects += @(".")
         }
 
-        # Locate Projects with Power Platform solutions
-        $ppsProjects = @($buildProjects | Where-Object { 
-            $projectPath = Join-Path $ENV:GITHUB_WORKSPACE $_
-            $settings = ReadSettings -baseFolder $projectPath -workflowName $env:GITHUB_WORKFLOW
-            $settings = AnalyzeRepo -settings $settings -token $token -baseFolder $ENV:GITHUB_WORKSPACE -project $_ -doNotIssueWarnings -doNotCheckArtifactSetting -server_url $ENV:GITHUB_SERVER_URL -repository $ENV:GITHUB_REPOSITORY
-            $settings.ppSolutionFolder -ne ""
-        })
-
         if ($buildProjects.Count -eq 1) {
             $projectsJSon = "[$($buildProjects | ConvertTo-Json -compress)]"
         }
@@ -223,18 +215,6 @@ try {
         Write-Host "ProjectsJson=$projectsJson"
         Add-Content -Path $env:GITHUB_OUTPUT -Value "ProjectCount=$($buildProjects.Count)"
         Write-Host "ProjectCount=$($buildProjects.Count)"
-
-        if ($ppsProjects.Count -eq 1) {
-            $ppsProjectsJSon = "[$($ppsProjects | ConvertTo-Json -compress)]"
-        }
-        else {
-            $ppsProjectsJSon = $ppsProjects | ConvertTo-Json -compress
-        }
-        Add-Content -Path $env:GITHUB_OUTPUT -Value "PpsProjectsJson=$ppsProjectsJson"
-        Add-Content -Path $env:GITHUB_ENV -Value "ppsProjects=$ppsProjectsJson"
-        Write-Host "PpsProjectsJson=$ppsProjectsJson"
-        Add-Content -Path $env:GITHUB_OUTPUT -Value "PpsProjectCount=$($ppsProjects.Count)"
-        Write-Host "PpsProjectCount=$($ppsProjects.Count)"
     }
 
     if ($getenvironments) {

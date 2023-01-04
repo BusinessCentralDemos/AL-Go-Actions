@@ -205,7 +205,7 @@ try {
         }
 
         # Locate Projects with Power Platform solutions
-        $ppsProjects = $buildProjects | Where-Object { 
+        $ppsProjects = @($buildProjects | Where-Object { 
             $projectPath = Join-Path $ENV:GITHUB_WORKSPACE $_
             Write-Host $projectPath
             $settings = ReadSettings -baseFolder $projectPath -workflowName $env:GITHUB_WORKFLOW
@@ -215,7 +215,7 @@ try {
             $settings.GetType() | Out-Host
             $settings.Count | Out-Host
             $settings.PpSolutionFolder -ne ""
-        }
+        })
 
         if ($buildProjects.Count -eq 1) {
             $projectsJSon = "[$($buildProjects | ConvertTo-Json -compress)]"

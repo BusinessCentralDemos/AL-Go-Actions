@@ -212,6 +212,8 @@ try {
             $settings | ConvertTo-Json | Out-Host
             $settings = AnalyzeRepo -settings $settings -token $token -baseFolder $ENV:GITHUB_WORKSPACE -project $_ -doNotIssueWarnings -doNotCheckArtifactSetting -server_url $ENV:GITHUB_SERVER_URL -repository $ENV:GITHUB_REPOSITORY
             $settings | ConvertTo-Json | Out-Host
+            $settings.GetType() | Out-Host
+            $settings.Count | Out-Host
             $settings.PpSolutionFolder -ne ""
         }
 

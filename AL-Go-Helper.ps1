@@ -399,6 +399,7 @@ function ReadSettings {
         "testDependencies"                       = @()
         "testFolders"                            = @()
         "bcptTestFolders"                        = @()
+        "PpSolutionFolder"                       = ""
         "installApps"                            = @()
         "installTestApps"                        = @()
         "installOnlyReferencedApps"              = $true
@@ -568,7 +569,13 @@ function AnalyzeRepo {
         throw "The type, specified in $ALGoSettingsFile, must be either 'Per Tenant Extension' or 'AppSource App'. It is '$($settings.type)'."
     }
 
-    if (-not (@($settings.appFolders)+@($settings.testFolders)+@($settings.bcptTestFolders))) {
+    if (-not (@($settings.appFolders)+@($settings.testFolders)+@($settings.bcptTestFolders)+@($settings.PpSolutionFolder))) {
+        Get-ChildItem -Path $projectPath | Where-Object { $_.PSIsContainer -and (Test-Path -Path (Join-Path $_.FullName "Other/Solution.xml")) } | ForEach-Object {
+            if ($settings.PpSolutionFolder) {
+                throw "More than one Power Platform solution found in the project. Please specify the Power Platform solution folder in .AL-Go/settings.json"
+            }
+            $settings.PpsolutionFolder = $_.Name
+        }
         Get-ChildItem -Path $projectPath | Where-Object { $_.PSIsContainer -and (Test-Path -Path (Join-Path $_.FullName "app.json")) } | ForEach-Object {
             $folder = $_
             $appJson = Get-Content (Join-Path $folder.FullName "app.json") -Encoding UTF8 | ConvertFrom-Json
@@ -602,6 +609,10 @@ function AnalyzeRepo {
         }
     }
 
+    if ($settings.PpSolutionFolder) {
+        Write-Host "Checking Power Platform solution folder"
+        # TODO: Check PpSolutionFolder
+    }
     Write-Host "Checking appFolders and testFolders"
     $dependencies = [ordered]@{}
     $appIdFolders = [ordered]@{}
@@ -993,10 +1004,11 @@ function Get-ProjectFolders {
     $projectPath = Join-Path $baseFolder $project
     $settings = ReadSettings -baseFolder $projectPath -workflowName "CI/CD"
     $settings = AnalyzeRepo -settings $settings -token $token -baseFolder $baseFolder -project $project -includeOnlyAppIds $includeOnlyAppIds -doNotIssueWarnings -doNotCheckArtifactSetting -server_url $server_url -repository $repository
-    $AlGoFolderArr = @()
-    if ($includeALGoFolder) { $AlGoFolderArr = @(".AL-Go") }
+    $AddFolderArr = @()
+    if ($includeALGoFolder) { $AddFolderArr = @(".AL-Go") }
+    if ($settings.PpSolutionFolder) { $AddFolderArr += @($settings.PpSolutionFolder) }
     Set-Location $baseFolder
-    @($settings.appFolders + $settings.testFolders + $settings.bcptTestFolders + $AlGoFolderArr) | ForEach-Object {
+    @($settings.appFolders + $settings.testFolders + $settings.bcptTestFolders + $AddFolderArr) | ForEach-Object {
         $fullPath = Join-Path $projectPath $_ -Resolve
         $relativePath = Resolve-Path -Path $fullPath -Relative
         $folder = $relativePath.Substring(2).Replace('\','/').ToLowerInvariant()

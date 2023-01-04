@@ -532,7 +532,8 @@ function AnalyzeRepo {
         [switch] $doNotIssueWarnings,
         [string[]] $includeOnlyAppIds,
         [string] $server_url = $ENV:GITHUB_SERVER_URL,
-        [string] $repository = $ENV:GITHUB_REPOSITORY
+        [string] $repository = $ENV:GITHUB_REPOSITORY,
+        [string] $workflowName = $env:GITHUB_WORKFLOW
     )
 
     if (!$runningLocal) {
@@ -941,9 +942,9 @@ function AnalyzeRepo {
 
                             $dependencyIds = @( @($settings.appDependencies + $settings.testDependencies) | ForEach-Object { $_.id })
                             $depProjectPath = Join-Path $baseFolder $depProject
-                            $depSettings = ReadSettings -baseFolder $depProjectPath -workflowName "CI/CD"
+                            $depSettings = ReadSettings -baseFolder $depProjectPath -workflowName $workflowName
 
-                            $depSettings = AnalyzeRepo -settings $depSettings -token $token -baseFolder $baseFolder -project $depProject -includeOnlyAppIds @($dependencyIds + $includeOnlyAppIds + $dependency.alwaysIncludeApps) -doNotIssueWarnings -doNotCheckArtifactSetting -server_url $server_url -repository $repository
+                            $depSettings = AnalyzeRepo -settings $depSettings -token $token -baseFolder $baseFolder -project $depProject -includeOnlyAppIds @($dependencyIds + $includeOnlyAppIds + $dependency.alwaysIncludeApps) -doNotIssueWarnings -doNotCheckArtifactSetting -server_url $server_url -repository $repository -workflowName $workflowName -runningLocal $runningLocal
 
                             Set-Location $projectPath
                             "appFolders","testFolders" | ForEach-Object {
@@ -990,6 +991,7 @@ function Get-ProjectFolders {
         [string[]] $includeOnlyAppIds,
         [string] $server_url = $ENV:GITHUB_SERVER_URL,
         [string] $repository = $ENV:GITHUB_REPOSITORY,
+        [string] $workflowName = $env:GITHUB_WORKFLOW,
         $token
     )
 
@@ -1002,8 +1004,8 @@ function Get-ProjectFolders {
 
     $projectFolders = @()
     $projectPath = Join-Path $baseFolder $project
-    $settings = ReadSettings -baseFolder $projectPath -workflowName "CI/CD"
-    $settings = AnalyzeRepo -settings $settings -token $token -baseFolder $baseFolder -project $project -includeOnlyAppIds $includeOnlyAppIds -doNotIssueWarnings -doNotCheckArtifactSetting -server_url $server_url -repository $repository
+    $settings = ReadSettings -baseFolder $projectPath -workflowName $workflowName
+    $settings = AnalyzeRepo -settings $settings -token $token -baseFolder $baseFolder -project $project -includeOnlyAppIds $includeOnlyAppIds -doNotIssueWarnings -doNotCheckArtifactSetting -server_url $server_url -repository $repository -workflowName $workflowName
     $AddFolderArr = @()
     if ($includeALGoFolder) { $AddFolderArr = @(".AL-Go") }
     if ($settings.PpSolutionFolder) { $AddFolderArr += @($settings.PpSolutionFolder) }

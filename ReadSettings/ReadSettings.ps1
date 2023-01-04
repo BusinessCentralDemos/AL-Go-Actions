@@ -203,7 +203,6 @@ try {
         if (Test-Path ".AL-Go" -PathType Container) {
             $buildProjects += @(".")
         }
-
         if ($buildProjects.Count -eq 1) {
             $projectsJSon = "[$($buildProjects | ConvertTo-Json -compress)]"
         }

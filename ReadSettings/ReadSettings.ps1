@@ -208,7 +208,7 @@ try {
         $ppsProjects = $buildProjects | Where-Object { 
             $projectPath = Join-Path $ENV:GITHUB_WORKSPACE $_
             $settings = ReadSettings -baseFolder $projectPath -workflowName $env:GITHUB_WORKFLOW
-            $settings = AnalyzeRepo -settings $settings -token $token -baseFolder $ENV:GITHUB_WORKSPACE -project $_ -doNotIssueWarnings -doNotCheckArtifactSetting -server_url $server_url -repository $repository
+            $settings = AnalyzeRepo -settings $settings -token $token -baseFolder $ENV:GITHUB_WORKSPACE -project $_ -doNotIssueWarnings -doNotCheckArtifactSetting -server_url $ENV:GITHUB_SERVER_URL -repository $ENV:GITHUB_REPOSITORY
             $settings.PpsolutionFolder -ne ""
         }
 

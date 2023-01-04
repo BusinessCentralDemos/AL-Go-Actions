@@ -399,7 +399,8 @@ function ReadSettings {
         "testDependencies"                       = @()
         "testFolders"                            = @()
         "bcptTestFolders"                        = @()
-        "PpSolutionFolder"                       = ""
+        "ppSolutionFolder"                       = ""
+        "ppSolutionType"                         = "Unmanaged"
         "installApps"                            = @()
         "installTestApps"                        = @()
         "installOnlyReferencedApps"              = $true
@@ -570,12 +571,12 @@ function AnalyzeRepo {
         throw "The type, specified in $ALGoSettingsFile, must be either 'Per Tenant Extension' or 'AppSource App'. It is '$($settings.type)'."
     }
 
-    if (-not (@($settings.appFolders)+@($settings.testFolders)+@($settings.bcptTestFolders)+@($settings.PpSolutionFolder))) {
+    if (-not (@($settings.appFolders)+@($settings.testFolders)+@($settings.bcptTestFolders)+@($settings.ppSolutionFolder))) {
         Get-ChildItem -Path $projectPath | Where-Object { $_.PSIsContainer -and (Test-Path -Path (Join-Path $_.FullName "Other/Solution.xml")) } | ForEach-Object {
-            if ($settings.PpSolutionFolder) {
+            if ($settings.ppSolutionFolder) {
                 throw "More than one Power Platform solution found in the project. Please specify the Power Platform solution folder in .AL-Go/settings.json"
             }
-            $settings.PpsolutionFolder = $_.Name
+            $settings.ppsolutionFolder = $_.Name
         }
         Get-ChildItem -Path $projectPath | Where-Object { $_.PSIsContainer -and (Test-Path -Path (Join-Path $_.FullName "app.json")) } | ForEach-Object {
             $folder = $_
@@ -610,7 +611,7 @@ function AnalyzeRepo {
         }
     }
 
-    if ($settings.PpSolutionFolder) {
+    if ($settings.ppSolutionFolder) {
         Write-Host "Checking Power Platform solution folder"
         # TODO: Check PpSolutionFolder
     }
@@ -1013,7 +1014,7 @@ function Get-ProjectFolders {
     $settings = AnalyzeRepo -settings $settings -token $token -baseFolder $baseFolder -project $project -includeOnlyAppIds $includeOnlyAppIds -doNotIssueWarnings -doNotCheckArtifactSetting -server_url $server_url -repository $repository -workflowName $workflowName
     $AddFolderArr = @()
     if ($includeALGoFolder) { $AddFolderArr = @(".AL-Go") }
-    if ($settings.PpSolutionFolder) { $AddFolderArr += @($settings.PpSolutionFolder) }
+    if ($settings.ppSolutionFolder) { $AddFolderArr += @($settings.ppSolutionFolder) }
     Set-Location $baseFolder
     @($settings.appFolders + $settings.testFolders + $settings.bcptTestFolders + $AddFolderArr) | ForEach-Object {
         $fullPath = Join-Path $projectPath $_ -Resolve

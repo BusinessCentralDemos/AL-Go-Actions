@@ -209,7 +209,7 @@ try {
             $projectPath = Join-Path $ENV:GITHUB_WORKSPACE $_
             $settings = ReadSettings -baseFolder $projectPath -workflowName $env:GITHUB_WORKFLOW
             $settings = AnalyzeRepo -settings $settings -token $token -baseFolder $ENV:GITHUB_WORKSPACE -project $_ -doNotIssueWarnings -doNotCheckArtifactSetting -server_url $ENV:GITHUB_SERVER_URL -repository $ENV:GITHUB_REPOSITORY
-            $settings.PpSolutionFolder -ne ""
+            $settings.ppSolutionFolder -ne ""
         })
 
         if ($buildProjects.Count -eq 1) {

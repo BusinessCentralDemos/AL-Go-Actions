@@ -16,7 +16,7 @@ $RepoSettingsFile = Join-Path '.github' 'AL-Go-Settings.json'
 $defaultCICDPushBranches = @( 'main', 'release/*', 'feature/*' )
 $defaultCICDPullRequestBranches = @( 'main' )
 $runningLocal = $local.IsPresent
-$defaultBcContainerHelperVersion = "preview" # Must be double quotes. Will be replaced by BcContainerHelperVersion if necessary in the deploy step
+$defaultBcContainerHelperVersion = "https://bccontainerhelper.blob.core.windows.net/public/preview.zip" # Must be double quotes. Will be replaced by BcContainerHelperVersion if necessary in the deploy step
 
 $runAlPipelineOverrides = @(
     "DockerPull"
@@ -227,7 +227,6 @@ function DownloadAndImportBcContainerHelper {
             $params += @{ "bcContainerHelperConfigFile" = $repoSettingsPath }
         }
     }
-    Write-Host $bcContainerHelperVersion
     if ($bcContainerHelperVersion -eq "") {
         $bcContainerHelperVersion = "latest"
     }
@@ -372,6 +371,7 @@ function ReadSettings {
     # Read Settings file
     $settings = [ordered]@{
         "type"                                   = "PTE"
+        "unusedALGoSystemFiles"                  = @()
         "projects"                               = @()
         "country"                                = "us"
         "artifact"                               = ""
@@ -399,7 +399,6 @@ function ReadSettings {
         "testDependencies"                       = @()
         "testFolders"                            = @()
         "bcptTestFolders"                        = @()
-        "powerPlatformSolutionFolder"             = ""
         "installApps"                            = @()
         "installTestApps"                        = @()
         "installOnlyReferencedApps"              = $true
@@ -417,6 +416,7 @@ function ReadSettings {
         "failOn"                                 = "error"
         "treatTestFailuresAsWarnings"            = $false
         "rulesetFile"                            = ""
+        "assignPremiumPlan"                      = $false
         "doNotBuildTests"                        = $false
         "doNotRunTests"                          = $false
         "doNotRunBcptTests"                      = $false
@@ -532,8 +532,7 @@ function AnalyzeRepo {
         [switch] $doNotIssueWarnings,
         [string[]] $includeOnlyAppIds,
         [string] $server_url = $ENV:GITHUB_SERVER_URL,
-        [string] $repository = $ENV:GITHUB_REPOSITORY,
-        [string] $workflowName = $env:GITHUB_WORKFLOW
+        [string] $repository = $ENV:GITHUB_REPOSITORY
     )
 
     if (!$runningLocal) {
@@ -563,20 +562,17 @@ function AnalyzeRepo {
             $settings.Add('enableAppSourceCop', $true)
         }
         if ($settings.enableAppSourceCop -and (-not ($settings.appSourceCopMandatoryAffixes))) {
-            throw "For AppSource Apps with AppSourceCop enabled, you need to specify AppSourceCopMandatoryAffixes in $ALGoSettingsFile"
+            # Do not throw an error if we only read the Repo Settings file
+            if (Test-Path (Join-Path $baseFolder $ALGoSettingsFile)) {
+                throw "For AppSource Apps with AppSourceCop enabled, you need to specify AppSourceCopMandatoryAffixes in $ALGoSettingsFile"
+            }
         }
     }
     else {
-        throw "The type, specified in $ALGoSettingsFile, must be either 'Per Tenant Extension' or 'AppSource App'. It is '$($settings.type)'."
+        throw "The type, specified in $RepoSettingsFile, must be either 'Per Tenant Extension' or 'AppSource App'. It is '$($settings.type)'."
     }
 
-    if (-not (@($settings.appFolders)+@($settings.testFolders)+@($settings.bcptTestFolders)+@($settings.powerPlatformSolutionFolder))) {
-        Get-ChildItem -Path $projectPath | Where-Object { $_.PSIsContainer -and (Test-Path -Path (Join-Path $_.FullName "Other/Solution.xml")) } | ForEach-Object {
-            if ($settings.powerPlatformSolutionFolder) {
-                throw "More than one Power Platform solution found in the project. Please specify the Power Platform solution folder in .AL-Go/settings.json"
-            }
-            $settings.powerPlatformSolutionFolder = $_.Name
-        }
+    if (-not (@($settings.appFolders)+@($settings.testFolders)+@($settings.bcptTestFolders))) {
         Get-ChildItem -Path $projectPath | Where-Object { $_.PSIsContainer -and (Test-Path -Path (Join-Path $_.FullName "app.json")) } | ForEach-Object {
             $folder = $_
             $appJson = Get-Content (Join-Path $folder.FullName "app.json") -Encoding UTF8 | ConvertFrom-Json
@@ -610,10 +606,6 @@ function AnalyzeRepo {
         }
     }
 
-    if ($settings.powerPlatformSolutionFolder) {
-        Write-Host "Checking Power Platform solution folder"
-        # TODO: Check PowerPlatformSolutionFolder
-    }
     Write-Host "Checking appFolders and testFolders"
     $dependencies = [ordered]@{}
     $appIdFolders = [ordered]@{}
@@ -642,7 +634,10 @@ function AnalyzeRepo {
             $appJsonFile = Join-Path $folder "app.json"
             $bcptSuiteFile = Join-Path $folder "bcptSuite.json"
             $enumerate = $true
-            if (-not (Test-Path $folder -PathType Container)) {
+
+            # Check if there are any folders matching $folder
+            # Test-Path $folder -PathType Container will return false if any files matches $folder (beside folders)
+            if (-not ((Test-Path $folder) -and (Get-ChildItem $folder -Directory))) {
                 if (!$doNotIssueWarnings) { OutputWarning -message "$descr $folderName, specified in $ALGoSettingsFile, does not exist" }
             }
             elseif (-not (Test-Path $appJsonFile -PathType Leaf)) {
@@ -727,11 +722,6 @@ function AnalyzeRepo {
         $settings.appFolders = @(ExcludeUnneededApps -folders $settings.appFolders -includeOnlyAppIds $includeOnlyAppIds -appIdFolders $appIdFolders)
         $settings.testFolders = @(ExcludeUnneededApps -folders $settings.testFolders -includeOnlyAppIds $includeOnlyAppIds -appIdFolders $appIdFolders)
         $settings.bcptTestFolders = @(ExcludeUnneededApps -folders $settings.bcptTestFolders -includeOnlyAppIds $includeOnlyAppIds -appIdFolders $appIdFolders)
-    }
-
-    if ($settings.appFolders.Count -eq 0 -and $settings.testFolders.Count -eq 0 -and $settings.bcptTestFolders.Count -eq 0) {
-        # No reason to check artifacts if we are not going to build anything
-        $doNotCheckArtifactSetting = $true
     }
 
     if (!$doNotCheckArtifactSetting) {
@@ -947,9 +937,9 @@ function AnalyzeRepo {
 
                             $dependencyIds = @( @($settings.appDependencies + $settings.testDependencies) | ForEach-Object { $_.id })
                             $depProjectPath = Join-Path $baseFolder $depProject
-                            $depSettings = ReadSettings -baseFolder $depProjectPath -workflowName $workflowName
+                            $depSettings = ReadSettings -baseFolder $depProjectPath -workflowName "CI/CD"
 
-                            $depSettings = AnalyzeRepo -settings $depSettings -token $token -baseFolder $baseFolder -project $depProject -includeOnlyAppIds @($dependencyIds + $includeOnlyAppIds + $dependency.alwaysIncludeApps) -doNotIssueWarnings -doNotCheckArtifactSetting -server_url $server_url -repository $repository -workflowName $workflowName -runningLocal $runningLocal
+                            $depSettings = AnalyzeRepo -settings $depSettings -token $token -baseFolder $baseFolder -project $depProject -includeOnlyAppIds @($dependencyIds + $includeOnlyAppIds + $dependency.alwaysIncludeApps) -doNotIssueWarnings -doNotCheckArtifactSetting -server_url $server_url -repository $repository
 
                             Set-Location $projectPath
                             "appFolders","testFolders" | ForEach-Object {
@@ -996,7 +986,6 @@ function Get-ProjectFolders {
         [string[]] $includeOnlyAppIds,
         [string] $server_url = $ENV:GITHUB_SERVER_URL,
         [string] $repository = $ENV:GITHUB_REPOSITORY,
-        [string] $workflowName = $env:GITHUB_WORKFLOW,
         $token
     )
 
@@ -1009,13 +998,12 @@ function Get-ProjectFolders {
 
     $projectFolders = @()
     $projectPath = Join-Path $baseFolder $project
-    $settings = ReadSettings -baseFolder $projectPath -workflowName $workflowName
-    $settings = AnalyzeRepo -settings $settings -token $token -baseFolder $baseFolder -project $project -includeOnlyAppIds $includeOnlyAppIds -doNotIssueWarnings -doNotCheckArtifactSetting -server_url $server_url -repository $repository -workflowName $workflowName
-    $AddFolderArr = @()
-    if ($includeALGoFolder) { $AddFolderArr = @(".AL-Go") }
-    if ($settings.powerPlatformSolutionFolder) { $AddFolderArr += @($settings.powerPlatformSolutionFolder) }
+    $settings = ReadSettings -baseFolder $projectPath -workflowName "CI/CD"
+    $settings = AnalyzeRepo -settings $settings -token $token -baseFolder $baseFolder -project $project -includeOnlyAppIds $includeOnlyAppIds -doNotIssueWarnings -doNotCheckArtifactSetting -server_url $server_url -repository $repository
+    $AlGoFolderArr = @()
+    if ($includeALGoFolder) { $AlGoFolderArr = @(".AL-Go") }
     Set-Location $baseFolder
-    @($settings.appFolders + $settings.testFolders + $settings.bcptTestFolders + $AddFolderArr) | ForEach-Object {
+    @($settings.appFolders + $settings.testFolders + $settings.bcptTestFolders + $AlGoFolderArr) | ForEach-Object {
         $fullPath = Join-Path $projectPath $_ -Resolve
         $relativePath = Resolve-Path -Path $fullPath -Relative
         $folder = $relativePath.Substring(2).Replace('\','/').ToLowerInvariant()
@@ -1070,12 +1058,11 @@ function CloneIntoNewFolder {
     $env:GITHUB_USER = $actor
     $env:GITHUB_TOKEN = $token
 
-    # Configure git username and email
+    # Configure git
     invoke-git config --global user.email "$actor@users.noreply.github.com"
     invoke-git config --global user.name "$actor"
-
-    # Configure hub to use https
     invoke-git config --global hub.protocol https
+    invoke-git config --global core.autocrlf false
 
     invoke-git clone $serverUrl
 
@@ -1673,7 +1660,7 @@ function CheckAndCreateProjectFolder {
                     "country" = "us"
                     "appFolders" = @()
                     "testFolders" = @()
-                } | ConvertTo-Json | Set-Content $ALGoSettingsFile -Encoding UTF8
+                } | Set-JsonContentLF -path $ALGoSettingsFile
             }
             else {
                 Set-Location $project
@@ -1693,6 +1680,9 @@ Function AnalyzeProjectDependencies {
 
     $appDependencies = @{}
     Write-Host "Analyzing projects"
+    # Loop through all projects
+    # Get all apps in the project
+    # Get all dependencies for the apps
     $projects | ForEach-Object {
         $project = $_
         Write-Host "- $project"
@@ -1706,23 +1696,65 @@ Function AnalyzeProjectDependencies {
             "dependencies" = @($unknownDependencies | ForEach-Object { $_.Split(':')[0] })
         }
     }
+    # AppDependencies is a hashtable with the following structure
+    # $appDependencies = @{
+    #     "project1" = @{
+    #         "apps" = @("appid1", "appid2")
+    #         "dependencies" = @("appid3", "appid4")
+    #     }
+    #     "project2" = @{
+    #         "apps" = @("appid5", "appid6")
+    #         "dependencies" = @("appid7", "appid8")
+    #     }
+    # }
     $no = 1
     Write-Host "Analyzing dependencies"
     while ($projects.Count -gt 0) {
         $thisJob = @()
+        # Loop through all projects and find projects that do not have dependencies on other projects in the list
+        # These projects can be built in parallel and are added to the build order
+        # The projects that are added to the build order are removed from the list of projects
+        # The loop continues until all projects have been added to the build order
         $projects | ForEach-Object {
             $project = $_
             Write-Host "- $project"
+            # Find all project dependencies for the current project
             $dependencies = $appDependencies."$project".dependencies
+            # Loop through all dependencies and locate the projects, containing the apps for which the current project has a dependency
             $foundDependencies = @($dependencies | ForEach-Object {
                 $dependency = $_
-                $projects | Where-Object { $_ -ne $project -and $appDependencies."$_".apps -contains $dependency }
+                # Find the project that contains the app for which the current project has a dependency
+                $depProject = $projects | Where-Object { $_ -ne $project -and $appDependencies."$_".apps -contains $dependency }
+                # Add this project and all projects on which that project has a dependency to the list of dependencies for the current project
+                $depProject | ForEach-Object {
+                    $_
+                    if ($projectDependencies.Value.ContainsKey($_)) {
+                        $projectDependencies.value."$_"
+                    }
+                }
             } | Select-Object -Unique)
+            # foundDependencies now contains all projects that the current project has a dependency on
+            # Update ref variable projectDependencies for this project
             if (!$projectDependencies.Value.ContainsKey($project)) {
+                # Loop through the list of projects for which we already built a dependency list
+                # Update the dependency list for that project if it contains the current project, which might lead to a changed dependency list
+                # This is needed because we are looping through the projects in a any order
+                $keys = @($projectDependencies.value.Keys)
+                $keys | ForEach-Object {
+                    if ($projectDependencies.value."$_" -contains $project) {
+                        $projectDeps = @( $projectDependencies.value."$_" )
+                        $projectDependencies.value."$_" = @( @($projectDeps + $foundDependencies) | Select-Object -Unique )
+                        if (Compare-Object -ReferenceObject $projectDependencies.value."$_" -differenceObject $projectDeps) {
+                            Write-Host "Add ProjectDependencies $($foundDependencies -join ',') to $_"
+                        }
+                    }
+                }
+                Write-Host "Set ProjectDependencies for $project to $($foundDependencies -join ',')"
                 $projectDependencies.value."$project" = $foundDependencies
             }
             if ($foundDependencies) {
                 Write-Host "Found dependencies to projects: $($foundDependencies -join ", ")"
+                # Add project to buildAlso for this dependency to ensure that this project also gets build when the dependency is built
                 $foundDependencies | ForEach-Object { 
                     if ($buildAlso.value.ContainsKey($_)) {
                         if ($buildAlso.value."$_" -notcontains $project) {
@@ -1735,7 +1767,7 @@ Function AnalyzeProjectDependencies {
                 }
             }
             else {
-                Write-Host "No dependencies found"
+                Write-Host "No additional dependencies found, add project to build order"
                 $thisJob += $project
             }
         }

@@ -30,11 +30,13 @@ try {
     $telemetryScope = CreateScope -eventId 'DO0083' -parentTelemetryScopeJson $parentTelemetryScopeJson
 
     # Set location
-    Write-Host "Build PowerPlatform Solution ${{ matrix.project }}"
-    Set-Location (Join-Path $ENV:GITHUB_WORKSPACE '${{ matrix.project }}')
+    Write-Host "Build PowerPlatform Solution $project"
+    Set-Location (Join-Path $ENV:GITHUB_WORKSPACE $project)
 
     # Create Output folder
-    New-Item -Path '.buildartifacts/PowerPlatformSolution' -ItemType Directory | Out-Null
+    if (!(Test-Path '.buildartifacts/PowerPlatformSolution')) {
+        New-Item -Path '.buildartifacts/PowerPlatformSolution' -ItemType Directory | Out-Null
+      }
 
     # Create a dummy file
     Set-Content -Path (Join-Path '.buildartifacts/PowerPlatformSolution' 'myPPSolution.txt') -value 'This is my PP Solution .zip file'

@@ -52,10 +52,13 @@ try {
                 $project = $_.Replace('\','_').Replace('/','_')
                 $refname = "$ENV:GITHUB_REF_NAME".Replace('/','_')
                 Write-Host "project '$project'"
-                $apps += @((Get-ChildItem -Path $artifacts -Filter "$project-$refname-Apps-*.*.*.*") | ForEach-Object { $_.FullName })
-                if (!($apps)) {
-                    throw "There is no artifacts present in $artifacts matching $project-$refname-Apps-<version>."
+                $projectApps = @((Get-ChildItem -Path $artifacts -Filter "$project-$refname-Apps-*.*.*.*") | ForEach-Object { $_.FullName })
+                if (!($projectApps)) {
+                    if ($project -ne '*') {
+                        throw "There is no artifacts present in $artifacts matching $project-$refname-Apps-<version>."
+                    }
                 }
+                $apps += $projectApps
                 $apps += @((Get-ChildItem -Path $artifacts -Filter "$project-$refname-Dependencies-*.*.*.*") | ForEach-Object { $_.FullName })
             }
         }

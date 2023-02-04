@@ -1,5 +1,5 @@
-name: PowerShell script
-author: Freddy Kristiansen
+name: BuildPowerPlatformSolution
+author: Andersg
 inputs:
   shell:
     description: Shell in which you want to run the action (powershell or pwsh)
@@ -32,6 +32,13 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: test
+      uses: microsoft/powerplatform-actions/pack-solution@v0
+      with:
+        solution-file: forgetMe.zip
+        solution-folder: ${{inputs.project}}
+        process-canvas-apps: true
+        
     - name: run
       shell: ${{ inputs.shell }}
       env:

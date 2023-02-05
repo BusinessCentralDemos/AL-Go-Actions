@@ -38,6 +38,7 @@ runs:
   using: composite
   steps:
     - name: Write directory contents to console
+      shell: ${{inputs.shell}}
       run: |
         for file in $(ls); do
           echo "--- $file ---"
@@ -48,13 +49,13 @@ runs:
       if: inputs.version
       shell: ${{inputs.shell}}
       run: |
-        ./updateSolutionFile.ps1 -version ${{inputs.version}}
+        .\updateSolutionFile.ps1 -version ${{inputs.version}}
 
     - name: Update BC connection
       if: inputs.company
       shell: ${{inputs.shell}}
       run: |
-        ./updateEnvironmentAndCompany.ps1 -companyId ${{inputs.companyId}} -environmentName ${{inputs.environment}}
+        .\updateEnvironmentAndCompany.ps1 -companyId ${{inputs.companyId}} -environmentName ${{inputs.environment}}
 
     - name: Test Pack (Not real - just workaround bug)
       uses: microsoft/powerplatform-actions/pack-solution@v0

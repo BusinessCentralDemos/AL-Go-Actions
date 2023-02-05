@@ -40,6 +40,7 @@ runs:
       uses: actions/checkout@v3
 
     - name: test
+      shell: pwsh
       run: echo ${{ inputs.settingsJson }}
 
 branding:

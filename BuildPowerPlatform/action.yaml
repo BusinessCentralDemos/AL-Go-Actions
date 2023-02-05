@@ -36,10 +36,8 @@ runs:
       shell: pwsh
       run: |
         echo "Parsing JSON string"
-        export PROPERTY1=$(echo "$inputs.settingsJson " | jq -r '.environment-url')
-        export PROPERTY2=$(echo "$inputs.settingsJson " | jq -r '.bcCompanyId')
-        echo "PROPERTY1=$PROPERTY1"
-        echo "PROPERTY2=$PROPERTY2"
+        $settingsObject = $env:Settings | ConvertFrom-Json
+        echo "{environmentUrl}={$settingsObject."$environment-url"}" >> $GITHUB_ENV
 
     - name: run
       shell: ${{ inputs.shell }}

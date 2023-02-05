@@ -43,9 +43,19 @@ runs:
       run: |
         echo "Parsing JSON string"
         $settingsObject = $ENV:_deployTo | ConvertFrom-Json
-        echo $settingsObject."$environment-url"
+        echo $settingsObject."environment-url"
         echo "{environmentUrl}={$settingsObject."$environment-url"}" >> $GITHUB_ENV
-
+    
+    - name: test up variables
+      shell: pwsh
+      env: 
+        _deployTo2: ${{parseJson(inputs.deployToJson).environmentName}}
+      run: |
+        echo "Parsing JSON string"
+        $settingsObject = $ENV:_deployTo2 | ConvertFrom-Json
+        echo $settingsObject.environmentName
+        echo "{environment}={$settingsObject."$environment-url"}" >> $GITHUB_ENV
+        
     - name: read variables
       shell: pwsh
       run: |

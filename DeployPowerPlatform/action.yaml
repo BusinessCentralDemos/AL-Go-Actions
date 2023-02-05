@@ -36,10 +36,9 @@ inputs:
     
 runs:
   using: composite
+  env: 
+    tempSolutionPath: .artifacts/tempPPSolution
   steps:
-    env: 
-      tempSolutionPath: .artifacts/tempPPSolution
-
     - name: Unpack solution artifact
       uses: microsoft/powerplatform-actions/unpack-solution@v0
       with:
@@ -58,8 +57,6 @@ runs:
         version: ${{ inputs.version }}
         companyId: ${{ inputs.companyId }}
         environmentName: ${{ inputs.environmentName }}
-
-     
 branding:
   icon: terminal
   color: blue

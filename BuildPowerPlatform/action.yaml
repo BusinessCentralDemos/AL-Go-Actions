@@ -38,11 +38,13 @@ runs:
   using: composite
   steps:
     - name: Update solution settings
+      if: inputs.version
       shell: ${{inputs.shell}}
       run: |
         .github/actions/script/updateSolutionFile.ps1 -version ${{inputs.version}}
 
     - name: Update BC connection
+      if: inputs.company
       shell: ${{inputs.shell}}
       run: |
         .github/actions/script/updateEnvironmentAndCompany.ps1 -companyId ${{inputs.companyId}} -environmentName ${{inputs.environment}}

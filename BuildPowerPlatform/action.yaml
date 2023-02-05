@@ -49,7 +49,7 @@ runs:
     - name: test up variables
       shell: pwsh
       env: 
-        _deployTo2: ${{parseJson(inputs.deployToJson).environmentName}}
+        _deployTo2: ${{fromJson(inputs.deployToJson).environmentName}}
       run: |
         echo "Parsing JSON string"
         $settingsObject = $ENV:_deployTo2 | ConvertFrom-Json

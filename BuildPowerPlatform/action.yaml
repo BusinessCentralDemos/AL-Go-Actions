@@ -45,13 +45,13 @@ runs:
       if: inputs.version
       shell: ${{inputs.shell}}
       run: |
-        .\updateSolutionFile.ps1 -version ${{inputs.version}}
+        ${{ github.action_path }}\updateSolutionFile.ps1 -version ${{inputs.version}}
 
     - name: Update BC connection
       if: inputs.company
       shell: ${{inputs.shell}}
       run: |
-        .\updateEnvironmentAndCompany.ps1 -companyId ${{inputs.companyId}} -environmentName ${{inputs.environment}}
+        ${{ github.action_path }}\updateEnvironmentAndCompany.ps1 -companyId ${{inputs.companyId}} -environmentName ${{inputs.environment}}
 
     - name: Test Pack (Not real - just workaround bug)
       uses: microsoft/powerplatform-actions/pack-solution@v0

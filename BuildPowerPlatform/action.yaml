@@ -38,9 +38,11 @@ runs:
   steps:
     - name: Set up variables
       shell: pwsh
+      env: 
+        _deployTo: ${{inputs.deployToJson}}
       run: |
         echo "Parsing JSON string"
-        $settingsObject = $inputs.deployToJson | ConvertFrom-Json
+        $settingsObject = $ENV:_deployTo | ConvertFrom-Json
         echo $settingsObject."$environment-url"
         echo "{environmentUrl}={$settingsObject."$environment-url"}" >> $GITHUB_ENV
 

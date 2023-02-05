@@ -39,11 +39,7 @@ runs:
   steps:
     - name: Write directory contents to console
       shell: ${{inputs.shell}}
-      run: |
-        for file in $(ls); do
-          echo "--- $file ---"
-          cat $file
-        done
+      run: ls
         
     - name: Update solution settings
       if: inputs.version

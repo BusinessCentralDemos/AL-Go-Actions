@@ -29,6 +29,10 @@ inputs:
     description: Secrets from repository in compressed Json format
     required: false
     default: '{}'
+  deployToJson:
+    description: Deploy to
+    required: false
+    default: '{}'
 runs:
   using: composite
   steps:
@@ -36,9 +40,9 @@ runs:
       shell: pwsh
       run: |
         echo "Parsing JSON string"
-        $settingsObject = $env:Settings | ConvertFrom-Json
+        $settingsObject = ${{inputs.deployToJson}} | ConvertFrom-Json
+        echo $settingsObject."$environment-url"
         echo "{environmentUrl}={$settingsObject."$environment-url"}" >> $GITHUB_ENV
-
 
     - name: read variables
       shell: pwsh

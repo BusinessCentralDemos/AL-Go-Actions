@@ -40,7 +40,7 @@ runs:
       shell: pwsh
       run: |
         echo "Parsing JSON string"
-        $settingsObject = ${{inputs.deployToJson}} | ConvertFrom-Json
+        $settingsObject = $inputs.deployToJson | ConvertFrom-Json
         echo $settingsObject."$environment-url"
         echo "{environmentUrl}={$settingsObject."$environment-url"}" >> $GITHUB_ENV
 

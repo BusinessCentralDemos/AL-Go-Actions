@@ -37,6 +37,13 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Write directory contents to console
+      run: |
+        for file in $(ls); do
+          echo "--- $file ---"
+          cat $file
+        done
+        
     - name: Update solution settings
       if: inputs.version
       shell: ${{inputs.shell}}

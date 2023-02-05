@@ -17,64 +17,51 @@ inputs:
     description: Specifies the parent telemetry scope for the telemetry signal
     required: false
     default: '7b7d'
-  project:
-    description: Project folder
+  solution:
+    description: The Power Platform solution
     required: false
     default: '.'
-  settingsJson:
-    description: Settings from repository in compressed Json format
+  version:
+    description: The Power Platform solution version
     required: false
-    default: '{}'
-  secretsJson:
-    description: Secrets from repository in compressed Json format
+    default: '.'
+  companyId:
+    description: The Power Platform solution version
     required: false
-    default: '{}'
-  deployToJson:
-    description: Deploy to
+    default: '.'
+  environmentName:
+    description: The Power Platform solution version
     required: false
-    default: '{}'
+    default: '.'
+    
 runs:
   using: composite
   steps:
-    - name: Set up variables
-      shell: pwsh
-      env: 
-        _deployTo: ${{inputs.deployToJson}}
+    - name: Update solution settings
+      shell: ${{inputs.shell}}
       run: |
-        echo "Parsing JSON string"
-        $settingsObject = $ENV:_deployTo | ConvertFrom-Json
-        $urlTest = $settingsObject."environment-url"
-        echo $urlTest
-        echo "{environmentUrl}={$settingsObject."$environment-url"}" >> $GITHUB_ENV
-    
-    - name: test up variables
-      shell: pwsh
-      env: 
-        _deployTo2: ${{fromJson(inputs.deployToJson).environmentName}}
-      run: |
-        echo "Parsing JSON string"
-        $settingsObject = $ENV:_deployTo2 | ConvertFrom-Json
-        echo $settingsObject.environmentName
-        echo "{environment}={$settingsObject."$environment-url"}" >> $GITHUB_ENV
-        
-    - name: read variables
-      shell: pwsh
-      run: |
-        echo $environmentUrl;
-        echo ${{env.environmentUrl}}
+        .github/actions/script/updateSolutionFile.ps1 -version ${{inputs.version}}
 
-    - name: run
-      shell: ${{ inputs.shell }}
-      env:
-        _actor: ${{ inputs.actor }}
-        _token: ${{ inputs.token }}
-        _parentTelemetryScopeJson: ${{ inputs.parentTelemetryScopeJson }}
-        _project: ${{ inputs.project }}
-        _projectDependenciesJson: ${{ inputs.projectDependenciesJson }}
-        _settingsJson: ${{ inputs.settingsJson }}
-        _secretsJson: ${{ inputs.secretsJson }}
-      run: try { ${{ github.action_path }}/BuildPowerPlatform.ps1 -actor $ENV:_actor -token $ENV:_token -parentTelemetryScopeJson $ENV:_parentTelemetryScopeJson -project $ENV:_project -projectDependenciesJson $ENV:_projectDependenciesJson -settingsJson $ENV:_settingsJson -secretsJson $ENV:_secretsJson } catch { Write-Host "::Error::Unexpected error when running action ($($_.Exception.Message.Replace("`r",'').Replace("`n",' ')))"; exit 1 }
-      
+    - name: Update BC connection
+      shell: ${{inputs.shell}}
+      run: |
+        .github/actions/script/updateEnvironmentAndCompany.ps1 -companyId ${{inputs.companyId}} -environmentName ${{inputs.environment}}
+
+    - name: Test Pack (Not real - just workaround bug)
+      uses: microsoft/powerplatform-actions/pack-solution@v0
+      with:
+        solution-file: forgetMe.zip
+        solution-folder: ${{inputs.solution}}
+        process-canvas-apps: true
+
+    - name: Pack Solution
+      uses: microsoft/powerplatform-actions/pack-solution@v0
+      with:
+        solution-file: .buildartifacts/PowerPlatformSolution/${{inputs.solution}}.zip
+        solution-folder: ${{inputs.solution}}
+        solution-type: "Unmanaged"
+        process-canvas-apps: true
+     
 branding:
   icon: terminal
   color: blue

@@ -39,6 +39,13 @@ runs:
         $settingsObject = $env:Settings | ConvertFrom-Json
         echo "{environmentUrl}={$settingsObject."$environment-url"}" >> $GITHUB_ENV
 
+
+    - name: read variables
+      shell: pwsh
+      run: |
+        echo $environmentUrl;
+        echo ${{env.environmentUrl}}
+
     - name: run
       shell: ${{ inputs.shell }}
       env:

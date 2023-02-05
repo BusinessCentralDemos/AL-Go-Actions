@@ -34,12 +34,12 @@ runs:
   steps:
     - name: Set up variables
       shell: pwsh
-        run: |
-          echo "Parsing JSON string"
-          export PROPERTY1=$(echo "$inputs.settingsJson " | jq -r '.environment-url')
-          export PROPERTY2=$(echo "$inputs.settingsJson " | jq -r '.bcCompanyId')
-          echo "PROPERTY1=$PROPERTY1"
-          echo "PROPERTY2=$PROPERTY2"
+      run: |
+        echo "Parsing JSON string"
+        export PROPERTY1=$(echo "$inputs.settingsJson " | jq -r '.environment-url')
+        export PROPERTY2=$(echo "$inputs.settingsJson " | jq -r '.bcCompanyId')
+        echo "PROPERTY1=$PROPERTY1"
+        echo "PROPERTY2=$PROPERTY2"
 
     - name: run
       shell: ${{ inputs.shell }}

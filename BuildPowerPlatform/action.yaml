@@ -32,13 +32,15 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: test
-      uses: microsoft/powerplatform-actions/pack-solution@v0
-      with:
-        solution-file: forgetMe.zip
-        solution-folder: ${{inputs.project}}
-        process-canvas-apps: true
-        
+    - name: Set up variables
+      shell: pwsh
+        run: |
+          echo "Parsing JSON string"
+          export PROPERTY1=$(echo "$inputs.settingsJson " | jq -r '.environment-url')
+          export PROPERTY2=$(echo "$inputs.settingsJson " | jq -r '.bcCompanyId')
+          echo "PROPERTY1=$PROPERTY1"
+          echo "PROPERTY2=$PROPERTY2"
+
     - name: run
       shell: ${{ inputs.shell }}
       env:
@@ -50,6 +52,33 @@ runs:
         _settingsJson: ${{ inputs.settingsJson }}
         _secretsJson: ${{ inputs.secretsJson }}
       run: try { ${{ github.action_path }}/BuildPowerPlatform.ps1 -actor $ENV:_actor -token $ENV:_token -parentTelemetryScopeJson $ENV:_parentTelemetryScopeJson -project $ENV:_project -projectDependenciesJson $ENV:_projectDependenciesJson -settingsJson $ENV:_settingsJson -secretsJson $ENV:_secretsJson } catch { Write-Host "::Error::Unexpected error when running action ($($_.Exception.Message.Replace("`r",'').Replace("`n",' ')))"; exit 1 }
+
+    - name: Update solution settings
+      shell: pwsh
+      run: |
+        .github/actions/script/updateSolutionFile.ps1 -version ${{env.version}}
+
+    - name: Update BC connection
+      shell: pwsh
+      run: |
+        .github/actions/script/updateEnvironmentAndCompany.ps1 -companyId ${{secrets.bcCompanyId}} -environmentName ${{secrets.bcEnvironmentName}}
+
+    - name: Test Pack (Not real - just workaround bug)
+      uses: microsoft/powerplatform-actions/pack-solution@v0
+      with:
+        solution-file: forgetMe.zip
+        solution-folder: ${{env.solutionName}}
+        solution-type: ${{env.solutionType}}
+        process-canvas-apps: true
+
+    - name: Pack Solution
+      uses: microsoft/powerplatform-actions/pack-solution@v0
+      with:
+        solution-file: "output/${{env.solutionName}}.zip"
+        solution-folder: "${{env.solutionName}}"
+        solution-type: "Unmanaged"
+        process-canvas-apps: true
+      
 branding:
   icon: terminal
   color: blue

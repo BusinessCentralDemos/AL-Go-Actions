@@ -34,10 +34,10 @@ inputs:
     required: false
     default: '.'
     
+env: 
+  tempSolutionPath: .artifacts/tempPPSolution
 runs:
   using: composite
-  env: 
-    tempSolutionPath: .artifacts/tempPPSolution
   steps:
     - name: Unpack solution artifact
       uses: microsoft/powerplatform-actions/unpack-solution@v0

@@ -43,8 +43,9 @@ runs:
       shell: ${{inputs.shell}}
       run: |
         Write-Host "Deploy settings: ${{ inputs.deploySettings }}";
-        Write-Host "Auth settings: ${{ inputs.deploySettings }}";
-        Write-Host "Artifacts: ${{ inputs.artifact }}";  
+        Write-Host "Auth settings: ${{ inputs.authSettings }}";
+        Write-Host "Artifact: ${{ inputs.artifact }}";  
+        ls ${{ inputs.artifact }}
   
     - name: Unpack solution artifact
       uses: microsoft/powerplatform-actions/unpack-solution@v0

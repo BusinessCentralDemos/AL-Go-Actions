@@ -40,7 +40,7 @@ runs:
   using: composite
   steps:
     - name: test input
-      uses: ${{inputs.shell}}
+      shell: ${{inputs.shell}}
       run: |
         Write-Host "Deploy settings: ${{ inputs.deploySettings }}";
         Write-Host "Auth settings: ${{ inputs.deploySettings }}";

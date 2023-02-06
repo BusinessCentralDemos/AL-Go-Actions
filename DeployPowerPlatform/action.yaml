@@ -47,7 +47,7 @@ runs:
         Write-Host "Artifact: ${{ inputs.artifact }}";  
         ls ;
         ls ${{ inputs.artifact }};
-        Get-ChildItem -Path ${{ inputs.artifact }} –Recurse
+        Get-ChildItem -Recurse -Path "${{ inputs.artifact }}"
   
     - name: Unpack solution artifact
       uses: microsoft/powerplatform-actions/unpack-solution@v0

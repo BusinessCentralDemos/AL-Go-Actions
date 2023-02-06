@@ -25,20 +25,27 @@ inputs:
     description: The Power Platform solution version
     required: false
     default: '.'
-  companyId:
-    description: The Power Platform solution version
+  deploySettings: 
+    description: The deploy settings
     required: false
-    default: '.'
-  environmentName:
-    description: The Power Platform solution version
+    default: '{}'
+  authSettings: 
+    description: The deploy settings
     required: false
-    default: '.'
+    default: '{}'
     
 env: 
   tempSolutionPath: .artifacts/tempPPSolution
 runs:
   using: composite
   steps:
+    - name: test input
+      uses: ${{inputs.shell}}
+      run: |
+        Write-Host "Deploy settings: ${{ inputs.deploySettings }}";
+        Write-Host "Auth settings: ${{ inputs.deploySettings }}";
+        Write-Host "Artifacts: ${{ inputs.artifact }}";  
+  
     - name: Unpack solution artifact
       uses: microsoft/powerplatform-actions/unpack-solution@v0
       with:

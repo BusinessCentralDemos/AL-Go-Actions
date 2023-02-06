@@ -46,7 +46,6 @@ runs:
         Write-Host "Auth settings: ${{ inputs.authSettings }}";
         Write-Host "Artifact: ${{ inputs.artifact }}";  
         ls ;
-        ls ${{ inputs.artifact }};
         Get-ChildItem -Recurse -Path "${{ inputs.artifact }}"
   
     - name: Unpack solution artifact

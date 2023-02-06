@@ -21,6 +21,10 @@ inputs:
     description: The Power Platform solution
     required: false
     default: '.'
+  outputFolder:
+    description: The Power Platform solution
+    required: false
+    default: '.'
   version:
     description: The Power Platform solution version
     required: false
@@ -37,10 +41,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Write directory contents to console
-      shell: ${{inputs.shell}}
-      run: ls
-        
     - name: Update solution settings
       if: inputs.version
       shell: ${{inputs.shell}}
@@ -63,10 +63,14 @@ runs:
     - name: Pack Solution
       uses: microsoft/powerplatform-actions/pack-solution@v0
       with:
-        solution-file: .buildartifacts/PowerPlatformSolution/${{inputs.solution}}.zip
+        solution-file: ${{inputs.outputFolder}}/${{inputs.solution}}.zip
         solution-folder: ${{inputs.solution}}
         solution-type: "Unmanaged"
         process-canvas-apps: true
+        
+    - name: Test Output path
+      shell: ${{inputs.shell}}
+      run: ls ${{inputs.outputFolder}}        
      
 branding:
   icon: terminal

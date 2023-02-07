@@ -25,6 +25,10 @@ inputs:
     description: The Power Platform solution version
     required: false
     default: '.'
+  projects: 
+    description: The projects
+    required: false
+    default: '{}'
   deploySettings: 
     description: The deploy settings
     required: false
@@ -45,7 +49,7 @@ runs:
         Write-Host "Deploy settings: ${{ inputs.deploySettings }}";
         Write-Host "Auth settings: ${{ inputs.authSettings }}";
         Write-Host "Artifact: ${{ inputs.artifact }}";  
-        ls ;
+        Write-Host "Artifact: ${{ inputs.projects }}";  
         Get-ChildItem -Recurse -Path "${{ inputs.artifact }}"
   
     - name: Unpack solution artifact

@@ -48,7 +48,7 @@ runs:
         Get-ChildItem -Recurse -Path "${{ inputs.artifact }}"
         
         
-    - name: Find solution file
+    - name: findSolutionFile
       shell: ${{inputs.shell}}
       run: |
             $filePath = Get-ChildItem -Path $path -Recurse -File | Select-Object -ExpandProperty FullName;
@@ -64,7 +64,7 @@ runs:
     - name: Unpack solution artifact
       uses: microsoft/powerplatform-actions/unpack-solution@v0
       with:
-        solution-file: ${{inputs.artifact}}
+        solution-file: ${{ steps.findSolutionFile.outputs.powerPlatformSolutionPath }}
         solution-folder: ${{env.tempSolutionPath}}
         solution-type: "Unmanaged"
         overwrite-files: true

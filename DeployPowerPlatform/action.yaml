@@ -25,10 +25,6 @@ inputs:
     description: The Power Platform solution version
     required: false
     default: '.'
-  projects: 
-    description: The projects
-    required: false
-    default: '{}'
   deploySettings: 
     description: The deploy settings
     required: false
@@ -49,8 +45,21 @@ runs:
         Write-Host "Deploy settings: ${{ inputs.deploySettings }}";
         Write-Host "Auth settings: ${{ inputs.authSettings }}";
         Write-Host "Artifact: ${{ inputs.artifact }}";  
-        Write-Host "Artifact: ${{ inputs.projects }}";  
         Get-ChildItem -Recurse -Path "${{ inputs.artifact }}"
+        
+        
+    - name: Find solution file
+      shell: ${{inputs.shell}}
+      run: |
+            $filePath = Get-ChildItem -Path $path -Recurse -File | Select-Object -ExpandProperty FullName;
+            Write-Host "Find Power Platform solution file";
+            foreach($file in $filePath){
+                if($file.contains("-PowerPlatformSolution-")){
+                    Write-Host "Found match:"$file;
+                    Add-Content -Path $env:GITHUB_OUTPUT -Value "powerPlatformSolutionPath=$file";
+                    return;
+                }
+            }
   
     - name: Unpack solution artifact
       uses: microsoft/powerplatform-actions/unpack-solution@v0

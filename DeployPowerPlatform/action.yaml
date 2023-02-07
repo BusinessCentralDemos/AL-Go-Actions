@@ -57,6 +57,7 @@ runs:
                 if($file.contains("-PowerPlatformSolution-")){
                     Write-Host "Found match:"$file;
                     Add-Content -Path $env:GITHUB_OUTPUT -Value "powerPlatformSolutionPath=$file";
+                    echo "{powerPlatformSolutionPath}={$file}" >> $GITHUB_ENV
                     return;
                 }
             }
@@ -64,7 +65,7 @@ runs:
     - name: Unpack solution artifact
       uses: microsoft/powerplatform-actions/unpack-solution@v0
       with:
-        solution-file: ${{ steps.findSolutionFile.outputs.powerPlatformSolutionPath }}
+        solution-file: ${{ env.powerPlatformSolutionPath }}
         solution-folder: ${{env.tempSolutionPath}}
         solution-type: "Unmanaged"
         overwrite-files: true

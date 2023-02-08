@@ -99,7 +99,8 @@ runs:
       with:
         shell: ${{ inputs.shell }}
         parentTelemetryScopeJson: ${{ inputs.parentTelemetryScopeJson }}
-        solution: .artifacts/tempPPSolution/source
+        solutionPath: .artifacts/tempPPSolution/source
+        solutionName: ppsolution
         outputFolder: .artifacts/tempPPSolution
         version: 1.0.0.2
         companyId: ${{ env.bcCompanyId }}

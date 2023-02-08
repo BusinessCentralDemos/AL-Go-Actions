@@ -82,7 +82,7 @@ runs:
         $environmentName = $obj.environmentName;
         echo "environmentName=$environmentName" >> $env:GITHUB_ENV
 
-        Write-Output $obj.environmentUrl
+        Write-Output $obj.'environment-url'
         $environmentUrl = $obj.'environment-url';
         echo "environmentUrl=$environmentUrl" >> $env:GITHUB_ENV
 
@@ -90,7 +90,7 @@ runs:
         $bcEnvironment = $obj.bcEnvironment;
         echo "bcEnvironment=$bcEnvironment" >> $env:GITHUB_ENV
 
-        write-output $obj.bcCompanyName
+        write-output $obj.bcCompanyId
         $bcCompanyId = $obj.bcCompanyId;
         echo "bcCompanyId=$bcCompanyId" >> $env:GITHUB_ENV
 

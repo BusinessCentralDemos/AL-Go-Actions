@@ -67,6 +67,10 @@ runs:
         solution-type: "Unmanaged"
         overwrite-files: true
         process-canvas-apps: true
+    
+    - name: see files
+      shell: ${{inputs.shell}}
+      run: ls
 
     - name: Rebuild solution
       uses: BusinessCentralDemos/AL-Go-Actions/BuildPowerPlatform@PowerPlatform

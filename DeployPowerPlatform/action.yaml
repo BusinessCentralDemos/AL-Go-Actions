@@ -75,7 +75,7 @@ runs:
     - name: Parse deployTo JSON
       shell: ${{inputs.shell}}
       run: |
-        $json = ${{ inputs.deploySettings }}
+        $json = " ${{ inputs.deploySettings }}"
         $obj = ConvertFrom-Json $json
 
         Write-Output $obj.environmentName

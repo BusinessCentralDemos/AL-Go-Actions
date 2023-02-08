@@ -34,8 +34,6 @@ inputs:
     required: false
     default: '{}'
     
-env: 
-  tempSolutionPath: .artifacts/tempPPSolution
 runs:
   using: composite
   steps:
@@ -65,7 +63,7 @@ runs:
       uses: microsoft/powerplatform-actions/unpack-solution@v0
       with:
         solution-file: ${{ env.powerPlatformSolutionPath }}
-        solution-folder: ${{ env.tempSolutionPath }}
+        solution-folder: .artifacts/tempPPSolution
         solution-type: "Unmanaged"
         overwrite-files: true
         process-canvas-apps: true
@@ -75,7 +73,7 @@ runs:
       with:
         shell: ${{ inputs.shell }}
         parentTelemetryScopeJson: ${{ inputs.parentTelemetryScopeJson }}
-        solution: ${{ env.tempSolutionPath }}
+        solution: .artifacts/tempPPSolution
         version: ${{ inputs.version }}
         companyId: ${{ inputs.companyId }}
         environmentName: ${{ inputs.environmentName }}

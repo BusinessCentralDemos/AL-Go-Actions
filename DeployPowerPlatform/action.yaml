@@ -70,7 +70,24 @@ runs:
     
     - name: see files
       shell: ${{inputs.shell}}
-      run: ls
+      run: ls .artifacts/tempPPSolution
+    
+    - name: Parse deployTo JSON
+      shell: ${{inputs.shell}}
+      run: |
+        $json = ${{ inputs.deploySettings }}
+        $obj = ConvertFrom-Json $json
+
+        Write-Output $obj.environmentName
+        echo "environmentName=$obj.environmentName" >> $env:GITHUB_ENV
+        Write-Output $obj.'environment-url'
+        echo "encironmentUrl=$obj.'environment-url'" >> $env:GITHUB_ENV
+        Write-Output $obj.bcEnvironment
+        echo "bcEnvironment=$obj.bcEnvironment" >> $env:GITHUB_ENV
+        Write-Output $obj.bcCompanyId
+        echo "bcCompanyId=$obj.bcCompanyId" >> $env:GITHUB_ENV
+        Write-Output $obj.projects
+        echo "projects=$obj.projects" >> $env:GITHUB_ENV
 
     - name: Rebuild solution
       uses: BusinessCentralDemos/AL-Go-Actions/BuildPowerPlatform@PowerPlatform
@@ -78,9 +95,9 @@ runs:
         shell: ${{ inputs.shell }}
         parentTelemetryScopeJson: ${{ inputs.parentTelemetryScopeJson }}
         solution: .artifacts/tempPPSolution
-        version: ${{ inputs.version }}
-        companyId: ${{ inputs.companyId }}
-        environmentName: ${{ inputs.environmentName }}
+        version: 1.0.0.2
+        companyId: ${{ env.bcCompanyId }}
+        environmentName: ${{ env.bcEnvironment }}
 branding:
   icon: terminal
   color: blue

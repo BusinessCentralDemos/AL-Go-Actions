@@ -109,7 +109,7 @@ runs:
     - name: Parse auth context
       shell: ${{inputs.shell}}
       run: |
-        $json = '${{ inputs.authContext }}'
+        $json = '${{ inputs.authSettings }}'
         $obj = ConvertFrom-Json $json
 
         $userName = $obj.userName;

@@ -63,14 +63,14 @@ runs:
       uses: microsoft/powerplatform-actions/unpack-solution@v0
       with:
         solution-file: ${{ env.powerPlatformSolutionPath }}
-        solution-folder: .artifacts/tempPPSolution
+        solution-folder: .artifacts/tempPPSolution/source
         solution-type: "Unmanaged"
         overwrite-files: true
         process-canvas-apps: true
     
     - name: see files
       shell: ${{inputs.shell}}
-      run: ls .artifacts/tempPPSolution
+      run: ls .artifacts/tempPPSolution/source
     
     - name: Parse deployTo JSON
       shell: ${{inputs.shell}}
@@ -99,7 +99,8 @@ runs:
       with:
         shell: ${{ inputs.shell }}
         parentTelemetryScopeJson: ${{ inputs.parentTelemetryScopeJson }}
-        solution: .artifacts/tempPPSolution
+        solution: .artifacts/tempPPSolution/source
+        outputFolder: .artifacts/tempPPSolution
         version: 1.0.0.2
         companyId: ${{ env.bcCompanyId }}
         environmentName: ${{ env.bcEnvironment }}

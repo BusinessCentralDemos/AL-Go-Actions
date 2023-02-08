@@ -32,11 +32,11 @@ inputs:
   companyId:
     description: The Power Platform solution version
     required: false
-    default: '.'
+    default: ''
   environmentName:
     description: The Power Platform solution version
     required: false
-    default: '.'
+    default: ''
     
 runs:
   using: composite
@@ -51,7 +51,7 @@ runs:
       if: inputs.companyId
       shell: ${{inputs.shell}}
       run: |
-        ${{ github.action_path }}\updateEnvironmentAndCompany.ps1 -companyId ${{inputs.companyId}} -environmentName ${{inputs.environment}}
+        ${{ github.action_path }}\updateEnvironmentAndCompany.ps1 -companyId ${{inputs.companyId}} -environmentName ${{inputs.environmentName}}
 
     - name: Test Pack (Not real - just workaround bug)
       uses: microsoft/powerplatform-actions/pack-solution@v0

@@ -122,7 +122,7 @@ runs:
       uses: microsoft/powerplatform-actions/who-am-i@v0
       with:
         user-name: ${{env.userName}}
-        password-secret: ${{env.passeword}}
+        password-secret: ${{env.password}}
         environment-url: ${{env.environmentUrl}}
 
     - name: Publish solution to Power Platform

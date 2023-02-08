@@ -78,20 +78,20 @@ runs:
         $json = '${{ inputs.deploySettings }}'
         $obj = ConvertFrom-Json $json
 
-        Write-Output $obj.environmentName
         $environmentName = $obj.environmentName;
+        Write-Output $environmentName
         echo "environmentName=$environmentName" >> $env:GITHUB_ENV
 
-        Write-Output $obj.'environment-url'
         $environmentUrl = $obj.'environment-url';
+        Write-Output $environmentUrl
         echo "environmentUrl=$environmentUrl" >> $env:GITHUB_ENV
-
-        Write-Output $obj.bcEnvironment
+        
         $bcEnvironment = $obj.bcEnvironment;
+        Write-Output $bcEnvironment
         echo "bcEnvironment=$bcEnvironment" >> $env:GITHUB_ENV
 
-        write-output $obj.bcCompanyId
         $bcCompanyId = $obj.bcCompanyId;
+        write-output $bcCompanyId
         echo "bcCompanyId=$bcCompanyId" >> $env:GITHUB_ENV
 
     - name: Rebuild solution
@@ -105,6 +105,38 @@ runs:
         version: 1.0.0.2
         companyId: ${{ env.bcCompanyId }}
         environmentName: ${{ env.bcEnvironment }}
+        
+    - name: Parse auth context
+      shell: ${{inputs.shell}}
+      run: |
+        $json = '${{ inputs.authContext }}'
+        $obj = ConvertFrom-Json $json
+
+        $userName = $obj.userName;
+        Write-Output $userName
+        echo "userName=$userName" >> $env:GITHUB_ENV
+        
+        $password = $obj.password;
+        Write-Output $password
+        echo "password=$password" >> $env:GITHUB_ENV
+
+    - name: Who am I
+      uses: microsoft/powerplatform-actions/who-am-i@v0
+      with:
+        user-name: ${{env.userName}}
+        password-secret: ${{env.passeword}}
+        environment-url: ${{env.environmentUrl}}
+
+    - name: Publish solution to Power Platform
+      uses: microsoft/powerplatform-actions/import-solution@v0
+      with:
+        user-name: ${{env.userName}}
+        password-secret: ${{env.passeword}}
+        environment-url: ${{env.environmentUrl}}
+        solution-file: .artifacts/tempPPSolution/ppsolution.zip
+        force-overwrite: true
+        publish-changes: true
+
 branding:
   icon: terminal
   color: blue

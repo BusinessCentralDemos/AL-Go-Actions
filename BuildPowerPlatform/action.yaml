@@ -48,7 +48,7 @@ runs:
         ${{ github.action_path }}\updateSolutionFile.ps1 -version ${{inputs.version}}
 
     - name: Update BC connection
-      if: inputs.company
+      if: inputs.companyId
       shell: ${{inputs.shell}}
       run: |
         ${{ github.action_path }}\updateEnvironmentAndCompany.ps1 -companyId ${{inputs.companyId}} -environmentName ${{inputs.environment}}

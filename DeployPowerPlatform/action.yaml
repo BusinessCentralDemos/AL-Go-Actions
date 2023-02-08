@@ -113,11 +113,11 @@ runs:
         $obj = ConvertFrom-Json $json
 
         $userName = $obj.userName;
-        Write-Output $userName
+        Write-Output "userName=$userName"
         echo "userName=$userName" >> $env:GITHUB_ENV
-        
+
         $password = $obj.password;
-        Write-Output $password
+        Write-Output "password=$password"
         echo "password=$password" >> $env:GITHUB_ENV
 
     - name: Who am I

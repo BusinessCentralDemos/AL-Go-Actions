@@ -57,7 +57,7 @@ runs:
                 if($file.contains("-PowerPlatformSolution-")){
                     Write-Host "Found match:"$file;
                     Add-Content -Path $env:GITHUB_OUTPUT -Value "powerPlatformSolutionPath=$file";
-                    echo "{powerPlatformSolutionPath}={$file}" >> $GITHUB_ENV
+                    echo "powerPlatformSolutionPath=$file" >> $GITHUB_ENV
                     return;
                 }
             }

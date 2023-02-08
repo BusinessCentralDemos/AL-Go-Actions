@@ -109,16 +109,14 @@ runs:
     - name: Parse auth context
       shell: ${{inputs.shell}}
       run: |
-        $json = '${{ inputs.authSettings }}'
-        $obj = ConvertFrom-Json $json
-
-        $userName = $obj.userName;
-        Write-Output "userName=$userName"
-        echo "userName=$userName" >> $env:GITHUB_ENV
-
-        $password = $obj.password;
-        Write-Output "password=$password"
-        echo "password=$password" >> $env:GITHUB_ENV
+          $authContext = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('${{  inputs.authSettings }}'))
+          $obj = ConvertFrom-Json $authContext
+          $userName = $obj.userName;
+          Write-Output "userName=$userName"
+          echo "userName=$userName" >> $env:GITHUB_ENV
+          $password = $obj.password;
+          Write-Output "password=$password"
+          echo "password=$password" >> $env:GITHUB_ENV
 
     - name: Who am I
       uses: microsoft/powerplatform-actions/who-am-i@v0

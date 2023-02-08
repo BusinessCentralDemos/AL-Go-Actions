@@ -129,7 +129,7 @@ runs:
       uses: microsoft/powerplatform-actions/import-solution@v0
       with:
         user-name: ${{env.userName}}
-        password-secret: ${{env.passeword}}
+        password-secret: ${{env.password}}
         environment-url: ${{env.environmentUrl}}
         solution-file: .artifacts/tempPPSolution/ppsolution.zip
         force-overwrite: true

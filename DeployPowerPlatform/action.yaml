@@ -65,7 +65,7 @@ runs:
       uses: microsoft/powerplatform-actions/unpack-solution@v0
       with:
         solution-file: ${{ env.powerPlatformSolutionPath }}
-        solution-folder: ${{env.tempSolutionPath}}
+        solution-folder: ${{ env.tempSolutionPath }}
         solution-type: "Unmanaged"
         overwrite-files: true
         process-canvas-apps: true

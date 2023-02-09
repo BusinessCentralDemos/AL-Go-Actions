@@ -44,8 +44,9 @@ inputs:
     description: The app revision number
     default: ''
 
-default: 
-  shell: ${{inputs.shell}}
+defaults:
+  run:
+    shell:  ${{ inputs.shell }}
     
 runs:
   using: composite

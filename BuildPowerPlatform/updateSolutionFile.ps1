@@ -1,22 +1,32 @@
 ﻿[CmdletBinding()]
 param(
-    [Parameter(Position = 1, mandatory = $false)]
-    [string] $version,
-    [Parameter(Position = 2, mandatory = $false)]
+    [Parameter(Position = 0, mandatory = $true)]
+    [string] $appBuild,
+    [Parameter(Position = 1, mandatory = $true)]
+    [string] $appRevision,
+    [Parameter(Position = 3, mandatory = $false)]
     [string] $managed
 )
 
 function Update-VersionNode {
     param(
-        [Parameter(Position = 0, mandatory = $false)]
-        [string] $version,
+        [Parameter(Position = 0, mandatory = $true)]
+        [string] $appBuild,
         [Parameter(Position = 1, mandatory = $true)]
+        [string] $appRevision,
+        [Parameter(Position = 2, mandatory = $true)]
         [xml] $xml
     )
     if ($version) {
+        Write-Host "Updating version";
         $versionNode = $xml.SelectSingleNode("//Version");
-        Write-Host "Updating version: "$version;
-        $versionNode.'#text' = $version;
+        $versionNodeText = $versionNode.'#text';
+        
+        $versionParts = $versionNodeText.Split('.');
+        $newVersionNumber = $versionParts[0] + '.' + $versionParts[1] + '.' + $appBuild + '.' + $appRevision;
+
+        Write-Host "New version: "$newVersionNumber;
+        $versionNode.'#text' = $newVersionNumber;
     }
 }
 
@@ -52,7 +62,7 @@ function Update-SolutionFiles {
         $xmlFile = [xml](Get-Content $solutionFile);
 
         Update-VersionNode -version $version -xml $xmlFile;
-        update-ManagedNode -managed $managed -xml $xmlFile;
+        Update-ManagedNode -managed $managed -xml $xmlFile;
         
         $xmlFile.Save($solutionFile);
     }
@@ -65,6 +75,3 @@ function Get-PowerPlatformSolutionFiles {
 
 $solutionFiles = Get-PowerPlatformSolutionFiles;
 Update-SolutionFiles -version $version -managed $managed -solutionFiles $solutionFiles;
-
-
-

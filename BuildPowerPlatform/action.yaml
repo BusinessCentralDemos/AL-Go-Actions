@@ -32,7 +32,7 @@ inputs:
   version:
     description: The Power Platform solution version
     required: false
-    default: '.'
+    default: ''
   companyId:
     description: The Power Platform solution version
     required: false

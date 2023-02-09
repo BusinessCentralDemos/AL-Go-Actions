@@ -17,8 +17,8 @@ inputs:
     description: Specifies the parent telemetry scope for the telemetry signal
     required: false
     default: '7b7d'
-  artifact:
-    description: The Power Platform solution
+  artifactPath:
+    description: Patch to the artifacts folder
     required: false
     default: '.'
   deploySettings: 
@@ -26,13 +26,16 @@ inputs:
     required: false
     default: '{}'
   authSettings: 
-    description: The deploy settings
+    description: The auth settings
     required: false
     default: '{}'
 
 default: 
   shell: ${{inputs.shell}}
-  
+
+env: 
+  tempFolder: ${{ inputs.artifactPath }}/tempPPSolution
+
 runs:
   using: composite
   steps:
@@ -40,8 +43,9 @@ runs:
       run: |
         Write-Host "Deploy settings: ${{ inputs.deploySettings }}";
         Write-Host "Auth settings: ${{ inputs.authSettings }}";
-        Write-Host "Artifact: ${{ inputs.artifact }}";  
-        Get-ChildItem -Recurse -Path "${{ inputs.artifact }}"
+        Write-Host "Artifact: ${{ inputs.artifactPath }}";  
+        Write-Host "Temp folder: ${{ env.tempFolder }}";  
+        Get-ChildItem -Recurse -Path "${{ inputs.artifactPath }}"
         
     - name: findSolutionFile
       run: |

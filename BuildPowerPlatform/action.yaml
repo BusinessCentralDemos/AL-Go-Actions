@@ -17,15 +17,15 @@ inputs:
     description: Specifies the parent telemetry scope for the telemetry signal
     required: false
     default: '7b7d'
-  solutionPath:
+  solutionFolder:
     description: The Power Platform solution path
     required: false
-    default: '.'
+    default: ''
   outputFolder:
     description: Output folder where the zip file will be placed
     required: false
-    default: '.'
- solutionName:
+    default: ''
+  outputFileName:
     description: The Power Platform solution name
     required: false
     default: '.'
@@ -61,14 +61,14 @@ runs:
       uses: microsoft/powerplatform-actions/pack-solution@v0
       with:
         solution-file: forgetMe.zip
-        solution-folder: ${{inputs.solutionPath}}
+        solution-folder: ${{inputs.solutionFolder}}
         process-canvas-apps: true
 
     - name: Pack Solution
       uses: microsoft/powerplatform-actions/pack-solution@v0
       with:
-        solution-file: ${{inputs.outputFolder}}/${{inputs.solutionName}}.zip
-        solution-folder: ${{inputs.solutionPath}}
+        solution-file: ${{inputs.outputFolder}}/${{inputs.outputFileName}}.zip
+        solution-folder: ${{inputs.solutionFolder}}
         solution-type: "Unmanaged"
         process-canvas-apps: true
         

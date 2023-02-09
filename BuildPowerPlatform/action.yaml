@@ -29,10 +29,6 @@ inputs:
     description: The Power Platform solution name
     required: false
     default: '.'
-  version:
-    description: The Power Platform solution version
-    required: false
-    default: ''
   companyId:
     description: The Power Platform solution version
     required: false
@@ -41,19 +37,26 @@ inputs:
     description: The Power Platform solution version
     required: false
     default: ''
+  appBuild:
+    description: The app build number
+    default: ''
+  appRevision: 
+    description: The app revision number
+    default: ''
+
+default: 
+  shell: ${{inputs.shell}}
     
 runs:
   using: composite
   steps:
     - name: Update solution settings
-      if: inputs.version
-      shell: ${{inputs.shell}}
+      if: inputs.appBuild
       run: |
         ${{ github.action_path }}\updateSolutionFile.ps1 -version ${{inputs.version}}
 
     - name: Update BC connection
       if: inputs.companyId
-      shell: ${{inputs.shell}}
       run: |
         ${{ github.action_path }}\updateEnvironmentAndCompany.ps1 -companyId ${{inputs.companyId}} -environmentName ${{inputs.environmentName}}
 
@@ -73,7 +76,6 @@ runs:
         process-canvas-apps: true
         
     - name: Test Output path
-      shell: ${{inputs.shell}}
       run: ls ${{inputs.outputFolder}}
      
 branding:

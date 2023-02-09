@@ -52,18 +52,20 @@ function Update-ManagedNode {
 
 function Update-SolutionFiles {
     param(
-        [Parameter(Position = 0, mandatory = $false)]
-        [string] $version,
-        [Parameter(Position = 1, mandatory = $false)]
+        [Parameter(Position = 0, mandatory = $true)]
+        [string] $appBuild,
+        [Parameter(Position = 1, mandatory = $true)]
+        [string] $appRevision,
+        [Parameter(Position = 2, mandatory = $false)]
         [string] $managed,
-        [Parameter(Position = 2, mandatory = $true)]
+        [Parameter(Position = 3, mandatory = $true)]
         [string[]] $solutionFiles
     )
     foreach ($solutionFile in $solutionFiles) {
         Write-Host "Updating solution: "$solutionFile;
         $xmlFile = [xml](Get-Content $solutionFile);
 
-        Update-VersionNode -version $version -xml $xmlFile;
+        Update-VersionNode -appBuild $appBuild -appRevision $appRevision -xml $xmlFile;
         Update-ManagedNode -managed $managed -xml $xmlFile;
         
         $xmlFile.Save($solutionFile);

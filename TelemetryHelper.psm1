@@ -29,7 +29,7 @@ $signals = @{
     "DO0102" = "AL-Go workflow ran: CreatePerformanceTestApp"
     "DO0103" = "AL-Go workflow ran: PublishToAppSource"
 }
-
+## Andersg <-- add your actions and worksflows above
 Function strToHexStr {
     Param(
         [string] $str

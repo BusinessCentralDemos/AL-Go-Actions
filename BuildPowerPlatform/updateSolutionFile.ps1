@@ -1,8 +1,10 @@
 ﻿[CmdletBinding()]
 param(
     [Parameter(Position = 0, mandatory = $true)]
-    [string] $appBuild,
+    [string] $solutionFolder,
     [Parameter(Position = 1, mandatory = $true)]
+    [string] $appBuild,
+    [Parameter(Position = 2, mandatory = $true)]
     [string] $appRevision,
     [Parameter(Position = 3, mandatory = $false)]
     [string] $managed
@@ -69,7 +71,11 @@ function Update-SolutionFiles {
 }
 
 function Get-PowerPlatformSolutionFiles {
-    $solutionFiles = Get-ChildItem -Path . -Filter "solution.xml" -Recurse -File;
+    param(
+        [Parameter(Position = 0, mandatory = $true)]
+        [string] $solutionFolder,
+    )
+    $solutionFiles = Get-ChildItem -Path $solutionFolder -Filter "solution.xml" -Recurse -File;
     return $solutionFiles.FullName;
 }
 

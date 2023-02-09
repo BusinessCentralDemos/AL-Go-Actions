@@ -26,15 +26,15 @@ inputs:
     required: false
     default: ''
   outputFileName:
-    description: The Power Platform solution name
+    description: The name of the output zip file
     required: false
     default: '.'
   companyId:
-    description: The Power Platform solution version
+    description: The Business Central company ID
     required: false
     default: ''
   environmentName:
-    description: The Power Platform solution version
+    description: The Power Platform environment name
     required: false
     default: ''
   appBuild:
@@ -51,7 +51,7 @@ runs:
       if: inputs.appBuild
       shell: ${{ inputs.shell }}
       run: |
-        ${{ github.action_path }}\updateSolutionFile.ps1 -version ${{inputs.version}}
+        ${{ github.action_path }}\updateSolutionFile.ps1 -appBuild ${{inputs.appBuild}} -appRevision ${{inputs.appRevision}} -solutionFolder ${{inputs.solutionFolder}}
 
     - name: Update BC connection
       if: inputs.companyId

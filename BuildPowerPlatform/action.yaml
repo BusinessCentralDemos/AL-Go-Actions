@@ -59,7 +59,7 @@ runs:
       run: |
         ${{ github.action_path }}\updateEnvironmentAndCompany.ps1 -companyId ${{inputs.companyId}} -environmentName ${{inputs.environmentName}}
 
-    - name: Test Pack (Not real - just workaround bug)
+    - name: Test Pack (Not real - just workaround for bug)
       uses: microsoft/powerplatform-actions/pack-solution@v0
       with:
         solution-file: forgetMe.zip
@@ -73,10 +73,6 @@ runs:
         solution-folder: ${{inputs.solutionFolder}}
         solution-type: "Unmanaged"
         process-canvas-apps: true
-        
-    - name: Test Output path
-      shell: ${{ inputs.shell }}
-      run: ls ${{inputs.outputFolder}}
      
 branding:
   icon: terminal

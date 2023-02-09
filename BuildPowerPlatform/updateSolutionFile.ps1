@@ -73,11 +73,11 @@ function Update-SolutionFiles {
 function Get-PowerPlatformSolutionFiles {
     param(
         [Parameter(Position = 0, mandatory = $true)]
-        [string] $solutionFolder,
+        [string] $solutionFolder
     )
     $solutionFiles = Get-ChildItem -Path $solutionFolder -Filter "solution.xml" -Recurse -File;
     return $solutionFiles.FullName;
 }
 
-$solutionFiles = Get-PowerPlatformSolutionFiles;
-Update-SolutionFiles -version $version -managed $managed -solutionFiles $solutionFiles;
+$solutionFiles = Get-PowerPlatformSolutionFiles -solutionFolder $solutionFolder;
+Update-SolutionFiles -appBuild $appBuild -appRevision $appRevision -managed $managed -solutionFiles $solutionFiles;

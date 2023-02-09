@@ -49,13 +49,13 @@ runs:
   steps:
     - name: Update solution settings
       if: inputs.appBuild
-        shell: ${{ inputs.shell }}
+      shell: ${{ inputs.shell }}
       run: |
         ${{ github.action_path }}\updateSolutionFile.ps1 -version ${{inputs.version}}
 
     - name: Update BC connection
       if: inputs.companyId
-        shell: ${{ inputs.shell }}
+      shell: ${{ inputs.shell }}
       run: |
         ${{ github.action_path }}\updateEnvironmentAndCompany.ps1 -companyId ${{inputs.companyId}} -environmentName ${{inputs.environmentName}}
 

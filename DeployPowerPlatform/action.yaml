@@ -30,9 +30,6 @@ inputs:
     required: false
     default: '{}'
 
-default: 
-  shell: ${{inputs.shell}}
-
 env: 
   tempFolder: ${{ inputs.artifactPath }}/tempPPSolution
 

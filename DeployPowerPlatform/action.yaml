@@ -37,16 +37,13 @@ runs:
   using: composite
   steps:
     - name: test input
-      shell: ${{inputs.shell}}
       run: |
         Write-Host "Deploy settings: ${{ inputs.deploySettings }}";
         Write-Host "Auth settings: ${{ inputs.authSettings }}";
         Write-Host "Artifact: ${{ inputs.artifact }}";  
         Get-ChildItem -Recurse -Path "${{ inputs.artifact }}"
         
-        
     - name: findSolutionFile
-      shell: ${{inputs.shell}}
       run: |
             $filePath = Get-ChildItem -Path $path -Recurse -File | Select-Object -ExpandProperty FullName
             Write-Host "Find Power Platform solution file"
@@ -69,11 +66,9 @@ runs:
         process-canvas-apps: true
     
     - name: see files
-      shell: ${{inputs.shell}}
       run: ls .artifacts/tempPPSolution/source
     
     - name: Parse deployTo JSON
-      shell: ${{inputs.shell}}
       run: |
         $json = '${{ inputs.deploySettings }}'
         $obj = ConvertFrom-Json $json
@@ -102,12 +97,10 @@ runs:
         solutionPath: .artifacts/tempPPSolution/source
         solutionName: ppsolution
         outputFolder: .artifacts/tempPPSolution
-        version: 1.0.0.2
         companyId: ${{ env.bcCompanyId }}
         environmentName: ${{ env.bcEnvironment }}
         
     - name: Parse auth context
-      shell: ${{inputs.shell}}
       run: |
           $authContext = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('${{  inputs.authSettings }}'))
           $obj = ConvertFrom-Json $authContext

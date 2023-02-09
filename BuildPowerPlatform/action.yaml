@@ -17,16 +17,16 @@ inputs:
     description: Specifies the parent telemetry scope for the telemetry signal
     required: false
     default: '7b7d'
-  solutionName:
-    description: The Power Platform solution name
-    required: false
-    default: '.'
   solutionPath:
     description: The Power Platform solution path
     required: false
     default: '.'
   outputFolder:
     description: Output folder where the zip file will be placed
+    required: false
+    default: '.'
+ solutionName:
+    description: The Power Platform solution name
     required: false
     default: '.'
   version:

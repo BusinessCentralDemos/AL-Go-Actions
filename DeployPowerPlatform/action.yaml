@@ -21,10 +21,6 @@ inputs:
     description: The Power Platform solution
     required: false
     default: '.'
-  version:
-    description: The Power Platform solution version
-    required: false
-    default: '.'
   deploySettings: 
     description: The deploy settings
     required: false
@@ -33,7 +29,10 @@ inputs:
     description: The deploy settings
     required: false
     default: '{}'
-    
+
+default: 
+  shell: ${{inputs.shell}}
+  
 runs:
   using: composite
   steps:
@@ -49,12 +48,13 @@ runs:
     - name: findSolutionFile
       shell: ${{inputs.shell}}
       run: |
-            $filePath = Get-ChildItem -Path $path -Recurse -File | Select-Object -ExpandProperty FullName;
-            Write-Host "Find Power Platform solution file";
+            $filePath = Get-ChildItem -Path $path -Recurse -File | Select-Object -ExpandProperty FullName
+            Write-Host "Find Power Platform solution file"
             foreach($file in $filePath){
                 if($file.contains("-PowerPlatformSolution-")){
-                    Write-Host "Found match:"$file;
-                    echo "powerPlatformSolutionPath=$file" >> $env:GITHUB_ENV
+                    Write-Host "Found match:"$file
+                    ## echo "powerPlatformSolutionPath=$file" >> $env:GITHUB_ENV
+                    Add-Content -path $env:GITHUB_ENV -value "powerPlatformSolutionPath=$file" 
                     return;
                 }
             }

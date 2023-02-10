@@ -74,8 +74,8 @@ runs:
         shell: ${{ inputs.shell }}
         run: |
           write-output ${{ inputs.directCommit }}
-          ls -la powerPlatform/tempPullChanges\${{inputs.solutionName}}
-          ls -la powerPlatform/tempPullChanges
+          ls powerPlatform/tempPullChanges\${{inputs.solutionName}}
+          ls powerPlatform/tempPullChanges
 
 branding:
   icon: terminal

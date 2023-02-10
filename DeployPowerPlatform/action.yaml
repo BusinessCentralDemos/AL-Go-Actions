@@ -30,11 +30,8 @@ inputs:
     required: false
     default: '{}'
 
-
 runs:
   using: composite
-  env: 
-    tempFolder: ${{ inputs.artifactPath }}/tempPPSolution
   steps:
     - name: test input
       shell: ${{ inputs.shell }}

@@ -34,15 +34,12 @@ inputs:
     required: false
     default: false
 
-env: 
-  tempPullChangesFolder: powerPlatform/tempPullChanges
-
 runs:
   using: composite
   steps:
       - name: Set up temporary folder
         shell: ${{ inputs.shell }}
-        run: mkdir -p ${{ env.tempPullChangesFolder }}
+        run: mkdir -p powerPlatform/tempPullChanges
 
       - name: Who am I
         uses: microsoft/powerplatform-actions/who-am-i@v0
@@ -58,27 +55,27 @@ runs:
           password-secret: ${{inputs.password}}
           environment-url: ${{inputs.environmentUrl}}
           solution-name: ${{inputs.solutionName}}
-          solution-output-file: ${{ env.tempPullChangesFolder }}\${{inputs.solutionName}}.zip
+          solution-output-file: powerPlatform/tempPullChanges\${{inputs.solutionName}}.zip
 
       - name: unpack-solution action
         uses: microsoft/powerplatform-actions/unpack-solution@v0
         with:
-          solution-file: ${{ env.tempPullChangesFolder }}\${{inputs.solutionName}}.zip
-          solution-folder: ${{ env.tempPullChangesFolder }}\${{inputs.solutionName}}
+          solution-file: powerPlatform/tempPullChanges\${{inputs.solutionName}}.zip
+          solution-folder: powerPlatform/tempPullChanges\${{inputs.solutionName}}
           solution-type: "Unmanaged"
           overwrite-files: true
           process-canvas-apps: true
 
       - name: Remove zip file
         shell: ${{ inputs.shell }}
-        run: rm ${{ env.tempPullChangesFolder }}\${{inputs.solutionName}}.zip
+        run: rm powerPlatform/tempPullChanges\${{inputs.solutionName}}.zip
 
       - name: Commit to git (not working yet)
         shell: ${{ inputs.shell }}
         run: |
           write-output ${{ inputs.directCommit }}
-          ls -la ${{ env.tempPullChangesFolder }}\${{inputs.solutionName}}
-          ls -la ${{ env.tempPullChangesFolder }}
+          ls -la powerPlatform/tempPullChanges\${{inputs.solutionName}}
+          ls -la powerPlatform/tempPullChanges
 
 branding:
   icon: terminal

@@ -96,11 +96,9 @@ runs:
       with:
         shell: ${{ inputs.shell }}
         parentTelemetryScopeJson: ${{ inputs.parentTelemetryScopeJson }}
-        solutionPath: .artifacts/tempPPSolution/source
-        solutionName: ppsolution
+        solutionFolder: .artifacts/tempPPSolution/source
         outputFolder: .artifacts/tempPPSolution
-        companyId: ${{ env.bcCompanyId }}
-        environmentName: ${{ env.bcEnvironment }}
+        outputFileName: ppsolution
         
     - name: Parse auth context
       shell: ${{ inputs.shell }}

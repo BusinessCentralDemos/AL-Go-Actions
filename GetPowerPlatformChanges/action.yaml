@@ -17,31 +17,68 @@ inputs:
     description: Specifies the parent telemetry scope for the telemetry signal
     required: false
     default: "7b7d"
-  solution:
+  solutionName:
     description: The Power Platform solution to get the changes from.
     required: true
-    default: "."
-  environment:
-    description: The name of the Power Platform environment to get the solution from.
+  password: 
+    description: The password to use to connect to the Power Platform environment.
     required: true
-    default: "."
-  settingsJson:
-    description: Settings from repository in compressed Json format
+  userName: 
+    description: The user name to use to connect to the Power Platform environment.
+    required: true
+  environmentUrl:
+    description: The URL to the Power Platform environment.
+    required: true
+  directCommit: 
+    description: If true, the changes will be committed directly to the branch. If false, the changes will be added to a pull request.
     required: false
-    default: "{}"
-  secretsJson:
-    description: Secrets from repository in compressed Json format
-    required: false
-    default: "{}"
+    default: false
+
+env: 
+  tempPullChangesFolder: powerPlatform/tempPullChanges
+
 runs:
   using: composite
   steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Set up temporary folder
+        shell: ${{ inputs.shell }}
+        run: mkdir -p ${{ env.tempPullChangesFolder }}
 
-    - name: test
-      shell: pwsh
-      run: echo ${{ inputs.settingsJson }}
+      - name: Who am I
+        uses: microsoft/powerplatform-actions/who-am-i@v0
+        with:
+          user-name: ${{inputs.userName}}
+          password-secret: ${{inputs.password}}
+          environment-url: ${{inputs.environmentUrl}}
+
+      - name: export-solution action
+        uses: microsoft/powerplatform-actions/export-solution@v0
+        with:
+          user-name: ${{inputs.userName}}
+          password-secret: ${{inputs.password}}
+          environment-url: ${{inputs.environmentUrl}}
+          solution-name: ${{inputs.solutionName}}
+          solution-output-file: ${{ env.tempPullChangesFolder }}\${{inputs.solutionName}}.zip
+
+      - name: unpack-solution action
+        uses: microsoft/powerplatform-actions/unpack-solution@v0
+        with:
+          solution-file: ${{ env.tempPullChangesFolder }}\${{inputs.solutionName}}.zip
+          solution-folder: ${{ env.tempPullChangesFolder }}\${{inputs.solutionName}}
+          solution-type: "Unmanaged"
+          overwrite-files: true
+          process-canvas-apps: true
+
+      - name: Remove zip file
+        shell: ${{ inputs.shell }}
+        run: rm ${{ env.tempPullChangesFolder }}\${{inputs.solutionName}}.zip
+
+      - name: Commit to git (not working yet)
+        shell: ${{ inputs.shell }}
+        run: |
+          write-output ${{ inputs.directCommit }}
+          ls -la ${{ env.tempPullChangesFolder }}\${{inputs.solutionName}}
+          ls -la ${{ env.tempPullChangesFolder }}
 
 branding:
   icon: terminal

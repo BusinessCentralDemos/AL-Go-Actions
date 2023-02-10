@@ -30,11 +30,11 @@ inputs:
     required: false
     default: '{}'
 
-env: 
-  tempFolder: ${{ inputs.artifactPath }}/tempPPSolution
 
 runs:
   using: composite
+  env: 
+    tempFolder: ${{ inputs.artifactPath }}/tempPPSolution
   steps:
     - name: test input
       shell: ${{ inputs.shell }}
@@ -73,6 +73,7 @@ runs:
       run: ls .artifacts/tempPPSolution/source
     
     - name: Parse deployTo JSON
+      shell: ${{ inputs.shell }}
       run: |
         $json = '${{ inputs.deploySettings }}'
         $obj = ConvertFrom-Json $json

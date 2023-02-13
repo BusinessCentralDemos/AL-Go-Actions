@@ -16,9 +16,6 @@ Param(
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version 2.0
 $telemetryScope = $null
-$bcContainerHelperPath = $null
-$tmpFolder = Join-Path ([System.IO.Path]::GetTempPath()) ([Guid]::NewGuid().ToString())
-
 
 Function Copy-Files {
     [CmdletBinding()]
@@ -28,9 +25,9 @@ Function Copy-Files {
         [Parameter(Mandatory = $true, HelpMessage = "The destination folder path")]
         [string]$Destination
     )
-                
+        
     Write-Host "Copying files from $Source to $Destination"
-
+        
     Get-ChildItem $Source | ForEach-Object {
         $destinationPath = Join-Path $Destination $_.Name
         Copy-Item $_.FullName $destinationPath
@@ -49,15 +46,15 @@ Function CloneAndCommit {
         [Parameter(Mandatory = $true, HelpMessage = "The name of the PowerPlatform solution")]
         [string]$PowerPlatformSolutionName
     )
-            
+        
     # Import the helper script
     . (Join-Path -Path $PSScriptRoot -ChildPath "..\AL-Go-Helper.ps1" -Resolve)
-    
+        
     $GitHubBranch = "";
     if (!$DirectCommit) {
         $GitHubBranch = [System.IO.Path]::GetRandomFileName()
     }
-            
+        
     # Clone the repository into a new folder
     $ServerUrl = CloneIntoNewFolder -Actor $GitHubActor -Token $GitHubToken -Branch $GitHubBranch
             
@@ -80,9 +77,8 @@ catch {
     TrackException -telemetryScope $telemetryScope -errorRecord $_
 }
 finally {
-    CleanupAfterBcContainerHelper -bcContainerHelperPath $bcContainerHelperPath
-    if (Test-Path $tmpFolder) {
-        Remove-Item $tmpFolder -Recurse -Force
+    if (Test-Path $tempLocation) {
+        Remove-Item $tempLocation -Recurse -Force
     }
 }
         

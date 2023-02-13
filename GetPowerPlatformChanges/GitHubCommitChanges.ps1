@@ -10,7 +10,7 @@ Param(
     [Parameter(HelpMessage = "The relative folder location of the PowerPlatform solution", Mandatory = $false)]
     [string] $SourceLocation,
     [Parameter(HelpMessage = "Direct Commit (Y/N)", Mandatory = $false)]
-    [bool] $DirectCommit
+    [string] $DirectCommit
 )
 
 $ErrorActionPreference = "Stop"
@@ -51,7 +51,7 @@ Function CloneAndCommit {
     . (Join-Path -Path $PSScriptRoot -ChildPath "..\AL-Go-Helper.ps1" -Resolve)
         
     $GitHubBranch = "";
-    if (!$DirectCommit) {
+    if ($DirectCommit -eq "true") {
         $GitHubBranch = [System.IO.Path]::GetRandomFileName()
     }
         

@@ -70,7 +70,7 @@ runs:
         shell: ${{ inputs.shell }}
         run: rm powerPlatform/tempPullChanges\${{inputs.solutionName}}.zip
 
-      - name: Commit to git (not working yet)
+      - name: Test output
         shell: ${{ inputs.shell }}
         run: |
           write-output "DirectCommit: ${{ inputs.directCommit }}"

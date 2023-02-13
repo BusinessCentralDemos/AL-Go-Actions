@@ -41,8 +41,8 @@ Function CloneAndCommit {
         [string]$GitHubActor,
         [Parameter(Mandatory = $true, HelpMessage = "The GitHub token running the action")]
         [string]$GitHubToken,
-        [Parameter(Mandatory = $true, HelpMessage = "Indicates if direct commit")]
-        [bool]$DirectCommit,
+        [Parameter(Mandatory = $true, HelpMessage = "Create a new branch or commit to the current branch")]
+        [bool]$CreateNewBranch,
         [Parameter(Mandatory = $true, HelpMessage = "The name of the PowerPlatform solution")]
         [string]$PowerPlatformSolutionName
     )
@@ -51,7 +51,7 @@ Function CloneAndCommit {
     . (Join-Path -Path $PSScriptRoot -ChildPath "..\AL-Go-Helper.ps1" -Resolve)
         
     $gitHubBranch = "";
-    if ($DirectCommit) {
+    if ($CreateNewBranch) {
         $gitHubBranch = [System.IO.Path]::GetRandomFileName()
     }
         
@@ -69,7 +69,7 @@ Function CloneAndCommit {
         
 # IMPORTANT: No code that can fail should be outside the try/catch
 try {
-    CloneAndCommit -GitHubActor $Actor -GitHubToken $Token -DirectCommit $DirectCommit -eq "y" -PowerPlatformSolutionName $SourceLocation
+    CloneAndCommit -GitHubActor $Actor -GitHubToken $Token -CreateNewBranch ($DirectCommit -eq "y") -PowerPlatformSolutionName $SourceLocation
     TrackTrace -telemetryScope $telemetryScope
 }
 catch {

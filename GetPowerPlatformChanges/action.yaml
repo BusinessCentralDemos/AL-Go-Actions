@@ -30,9 +30,9 @@ inputs:
     description: The URL to the Power Platform environment.
     required: true
   directCommit: 
-    description: If true, the changes will be committed directly to the branch. If false, the changes will be added to a pull request.
+    description: (N/Y) If Y, the changes will be committed directly to the branch. If N, the changes will be committed to a branch named after the solution.
     required: false
-    default: false
+    default: N
 
 runs:
   using: composite

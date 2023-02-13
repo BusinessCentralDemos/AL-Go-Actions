@@ -5,9 +5,9 @@ Param(
     [string] $Token,
     [Parameter(HelpMessage = "Specifies the parent telemetry scope for the telemetry signal", Mandatory = $false)]
     [string] $ParentTelemetryScopeJson = '7b7d',
-    [Parameter(HelpMessage = "Temporary location for files to be checked in", Mandatory = $false)]
+    [Parameter(HelpMessage = "The current location for files to be checked in", Mandatory = $false)]
     [string] $TempLocation,
-    [Parameter(HelpMessage = "The relative folder location of the PowerPlatform solution", Mandatory = $false)]
+    [Parameter(HelpMessage = "The relative folder location of the PowerPlatform solution in the repository", Mandatory = $false)]
     [string] $SourceLocation,
     [Parameter(HelpMessage = "Direct Commit (Y/N)", Mandatory = $false)]
     [string] $DirectCommit
@@ -50,9 +50,9 @@ Function CloneAndCommit {
     # Import the helper script
     . (Join-Path -Path $PSScriptRoot -ChildPath "..\AL-Go-Helper.ps1" -Resolve)
         
-    $GitHubBranch = "";
-    if ($DirectCommit -eq "true") {
-        $GitHubBranch = [System.IO.Path]::GetRandomFileName()
+    $gitHubBranch = "";
+    if ($DirectCommit) {
+        $gitHubBranch = [System.IO.Path]::GetRandomFileName()
     }
         
     # Clone the repository into a new folder
@@ -61,15 +61,15 @@ Function CloneAndCommit {
     $baseFolder = (Get-Location).Path
     Set-Location $baseFolder
             
-    Copy-Files -Source $TempLocation -Destination "$baseFolder/$SourceLocation"
+    Copy-Files -Source $TempLocation -Destination "$baseFolder/$PowerPlatformSolutionName"
             
     # Commit from the new folder
-    CommitFromNewFolder -ServerUrl $serverUrl -CommitMessage "Upadte solution: ($PowerPlatformSolutionName)" -Branch $GitHubBranch
+    CommitFromNewFolder -ServerUrl $serverUrl -CommitMessage "Upadte solution: ($PowerPlatformSolutionName)" -Branch $gitHubBranch
 }
         
 # IMPORTANT: No code that can fail should be outside the try/catch
 try {
-    CloneAndCommit -GitHubActor $Actor -GitHubToken $Token -GitHubBranch $branch -PowerPlatformSolutionName $SourceLocation
+    CloneAndCommit -GitHubActor $Actor -GitHubToken $Token -DirectCommit $DirectCommit -eq "y" -PowerPlatformSolutionName $SourceLocation
     TrackTrace -telemetryScope $telemetryScope
 }
 catch {

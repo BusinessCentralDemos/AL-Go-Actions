@@ -1,21 +1,21 @@
 Param(
     [Parameter(HelpMessage = "The GitHub actor running the action", Mandatory = $false)]
-    [string] $actor,
+    [string] $Actor,
     [Parameter(HelpMessage = "The GitHub token running the action", Mandatory = $false)]
-    [string] $token,
+    [string] $Token,
     [Parameter(HelpMessage = "Specifies the parent telemetry scope for the telemetry signal", Mandatory = $false)]
-    [string] $parentTelemetryScopeJson = '7b7d',
+    [string] $ParentTelemetryScopeJson = '7b7d',
     [Parameter(HelpMessage = "Temporary location for files to be checked in", Mandatory = $false)]
-    [string] $tempLocation,
+    [string] $TempLocation,
     [Parameter(HelpMessage = "The relative folder location of the PowerPlatform solution", Mandatory = $false)]
-    [string] $sourceLocation,
+    [string] $SourceLocation,
     [Parameter(HelpMessage = "Direct Commit (Y/N)", Mandatory = $false)]
-    [bool] $directCommit
+    [bool] $DirectCommit
 )
 
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version 2.0
-$telemetryScope = $null
+$telemetryScope = $ParentTelemetryScopeJson;
 
 Function Copy-Files {
     [CmdletBinding()]
@@ -56,20 +56,20 @@ Function CloneAndCommit {
     }
         
     # Clone the repository into a new folder
-    $ServerUrl = CloneIntoNewFolder -Actor $GitHubActor -Token $GitHubToken -Branch $GitHubBranch
+    $serverUrl = CloneIntoNewFolder -Actor $GitHubActor -Token $GitHubToken -Branch $GitHubBranch
             
-    $BaseFolder = (Get-Location).Path
-    Set-Location $BaseFolder
+    $baseFolder = (Get-Location).Path
+    Set-Location $baseFolder
             
-    Copy-Files -Source $tempLocation -Destination "$BaseFolder/$sourceLocation"
+    Copy-Files -Source $TempLocation -Destination "$baseFolder/$SourceLocation"
             
     # Commit from the new folder
-    CommitFromNewFolder -ServerUrl $ServerUrl -CommitMessage "Upadte solution: ($PowerPlatformSolutionName)" -Branch $GitHubBranch
+    CommitFromNewFolder -ServerUrl $serverUrl -CommitMessage "Upadte solution: ($PowerPlatformSolutionName)" -Branch $GitHubBranch
 }
         
 # IMPORTANT: No code that can fail should be outside the try/catch
 try {
-    CloneAndCommit -GitHubActor $actor -GitHubToken $token -GitHubBranch $branch -PowerPlatformSolutionName $sourceLocation
+    CloneAndCommit -GitHubActor $Actor -GitHubToken $Token -GitHubBranch $branch -PowerPlatformSolutionName $SourceLocation
     TrackTrace -telemetryScope $telemetryScope
 }
 catch {
@@ -77,8 +77,8 @@ catch {
     TrackException -telemetryScope $telemetryScope -errorRecord $_
 }
 finally {
-    if (Test-Path $tempLocation) {
-        Remove-Item $tempLocation -Recurse -Force
+    if (Test-Path $TempLocation) {
+        Remove-Item $TempLocation -Recurse -Force
     }
 }
         

@@ -16,6 +16,7 @@ Param(
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version 2.0
 $telemetryScope = $ParentTelemetryScopeJson;
+Write-Host "Starting GitHubCommitChanges.ps1 with parameters: $([environment]::Newline)Actor: $Actor$([environment]::Newline)Token: $Token$([environment]::Newline)ParentTelemetryScopeJson: $ParentTelemetryScopeJson$([environment]::Newline)TempLocation: $TempLocation$([environment]::Newline)SourceLocation: $SourceLocation$([environment]::Newline)DirectCommit: $DirectCommit"
 
 Function Copy-Files {
     [CmdletBinding()]
@@ -27,7 +28,6 @@ Function Copy-Files {
     )
         
     Write-Host "Copying files from $Source to $Destination"
-        
     Get-ChildItem $Source | ForEach-Object {
         $destinationPath = Join-Path $Destination $_.Name
         Copy-Item $_.FullName $destinationPath
@@ -53,10 +53,12 @@ Function CloneAndCommit {
     $gitHubBranch = "";
     if ($CreateNewBranch) {
         $gitHubBranch = [System.IO.Path]::GetRandomFileName()
+        Write-Host "Creating a new branch: $gitHubBranch"
     }
         
     # Clone the repository into a new folder
-    $serverUrl = CloneIntoNewFolder -Actor $GitHubActor -Token $GitHubToken -Branch $GitHubBranch
+    Write-Host "Cloning the repository into a new folder"
+    $serverUrl = CloneIntoNewFolder -Actor $GitHubActor -Token $GitHubToken -Branch $gitHubBranch
             
     $baseFolder = (Get-Location).Path
     Set-Location $baseFolder
@@ -64,6 +66,7 @@ Function CloneAndCommit {
     Copy-Files -Source $TempLocation -Destination "$baseFolder/$PowerPlatformSolutionName"
             
     # Commit from the new folder
+    write-host "Committing changes from the new folder $baseFolder/$PowerPlatformSolutionName"
     CommitFromNewFolder -ServerUrl $serverUrl -CommitMessage "Upadte solution: ($PowerPlatformSolutionName)" -Branch $gitHubBranch
 }
         

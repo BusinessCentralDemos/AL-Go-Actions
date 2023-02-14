@@ -81,10 +81,14 @@ Function CloneAndCommit {
     $baseFolder = (Get-Location).Path
     Set-Location $baseFolder
             
-    Copy-Files -Source $fullTempLocation -Destination "$baseFolder/$PowerPlatformSolutionName"
+    Copy-Files -Source $fullTempLocation -Destination "$baseFolder\$PowerPlatformSolutionName"
             
     # Commit from the new folder
-    write-host "Committing changes from the new folder $baseFolder/$PowerPlatformSolutionName"
+    write-host "Committing changes from the new folder $baseFolder\$PowerPlatformSolutionName"
+    
+    ls $baseFolder\$PowerPlatformSolutionName;
+    ls ;
+
     CommitFromNewFolder -ServerUrl $serverUrl -CommitMessage "Upadte solution: ($PowerPlatformSolutionName)" -Branch $gitHubBranch
 }
         

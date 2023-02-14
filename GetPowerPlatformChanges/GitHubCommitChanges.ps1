@@ -91,11 +91,11 @@ Function CloneAndCommit {
 # IMPORTANT: No code that can fail should be outside the try/catch
 try {
     CloneAndCommit -GitHubActor $Actor -GitHubToken $Token -CreateNewBranch ($DirectCommit -eq "y") -PowerPlatformSolutionName $SourceLocation
-    TrackTrace -telemetryScope $telemetryScope
+    #TrackTrace -telemetryScope $telemetryScope
 }
 catch {
     Write-Error -message "Pull changes failed.$([environment]::Newline)Error: $($_.Exception.Message)$([environment]::Newline)Stacktrace: $($_.scriptStackTrace)"
-    TrackException -telemetryScope $telemetryScope -errorRecord $_
+    #TrackException -telemetryScope $telemetryScope -errorRecord $_
 }
 finally {
     if (Test-Path $TempLocation) {

@@ -18,12 +18,28 @@ Set-StrictMode -Version 2.0
 $telemetryScope = $ParentTelemetryScopeJson;
 Write-Host "Starting GitHubCommitChanges.ps1 with parameters: $([environment]::Newline)Actor: $Actor$([environment]::Newline)Token: $Token$([environment]::Newline)ParentTelemetryScopeJson: $ParentTelemetryScopeJson$([environment]::Newline)TempLocation: $TempLocation$([environment]::Newline)SourceLocation: $SourceLocation$([environment]::Newline)DirectCommit: $DirectCommit"
 
+function GetFullPath() {
+    [CmdletBinding()]
+    Param (
+        [Parameter(Mandatory = $true)]
+        [string]$Path
+    )       
+    if ([System.IO.Path]::IsPathRooted($Path)) {
+        write-host "Path is already full path: $Path";
+        return $Path
+    } 
+
+    $tempFullPath = Get-Item -Path $path | Select-Object -ExpandProperty FullName
+    write-host "Path is not full path, converting to full path: $path -> $tempFullPath";
+    return $tempFullPath;
+}
+
 Function Copy-Files {
     [CmdletBinding()]
     Param (
-        [Parameter(Mandatory = $true, HelpMessage = "The source folder path")]
+        [Parameter(Mandatory = $true)]
         [string]$Source,
-        [Parameter(Mandatory = $true, HelpMessage = "The destination folder path")]
+        [Parameter(Mandatory = $true)]
         [string]$Destination
     )
         
@@ -46,6 +62,8 @@ Function CloneAndCommit {
         [Parameter(Mandatory = $true, HelpMessage = "The name of the PowerPlatform solution")]
         [string]$PowerPlatformSolutionName
     )
+
+    $fullTempLocation = GetFullPath -Path $TempLocation;
         
     # Import the helper script
     . (Join-Path -Path $PSScriptRoot -ChildPath "..\AL-Go-Helper.ps1" -Resolve)
@@ -63,7 +81,7 @@ Function CloneAndCommit {
     $baseFolder = (Get-Location).Path
     Set-Location $baseFolder
             
-    Copy-Files -Source $TempLocation -Destination "$baseFolder/$PowerPlatformSolutionName"
+    Copy-Files -Source $fullTempLocation -Destination "$baseFolder/$PowerPlatformSolutionName"
             
     # Commit from the new folder
     write-host "Committing changes from the new folder $baseFolder/$PowerPlatformSolutionName"

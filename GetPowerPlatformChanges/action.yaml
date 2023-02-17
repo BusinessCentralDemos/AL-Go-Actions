@@ -47,16 +47,16 @@ runs:
       - name: Who am I
         uses: microsoft/powerplatform-actions/who-am-i@v0
         with:
-          user-name: ${{inputs.userName}}
-          password-secret: ${{inputs.password}}
-          environment-url: ${{inputs.environmentUrl}}
+          user-name: ${{env.userName}}
+          password-secret: ${{env.password}}
+          environment-url: ${{env.environmentUrl}}
 
       - name: export-solution action
         uses: microsoft/powerplatform-actions/export-solution@v0
         with:
-          user-name: ${{inputs.userName}}
-          password-secret: ${{inputs.password}}
-          environment-url: ${{inputs.environmentUrl}}
+          user-name: ${{env.userName}}
+          password-secret: ${{env.password}}
+          environment-url: ${{env.environmentUrl}}
           solution-name: ${{inputs.solutionName}}
           solution-output-file: powerPlatform/tempPullChanges\${{inputs.solutionName}}.zip
 

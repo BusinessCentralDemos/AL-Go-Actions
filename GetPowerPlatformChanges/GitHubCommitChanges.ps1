@@ -88,8 +88,8 @@ Function CloneAndCommit {
     # Commit from the new folder
     write-host "Committing changes from the new folder $baseFolder\$PowerPlatformSolutionName"
     
-    ls $baseFolder\$PowerPlatformSolutionName;
-    ls ;
+    Get-ChildItem $baseFolder\$PowerPlatformSolutionName;
+    Get-ChildItem ;
 
     CommitFromNewFolder -ServerUrl $serverUrl -CommitMessage "Update solution: $PowerPlatformSolutionName with latest from environment: $EnvironmentName" -Branch $gitHubBranch
 }
@@ -97,11 +97,11 @@ Function CloneAndCommit {
 # IMPORTANT: No code that can fail should be outside the try/catch
 try {
     CloneAndCommit -GitHubActor $Actor -GitHubToken $Token -CreateNewBranch ($DirectCommit -eq "false") -PowerPlatformSolutionName $SourceLocation
-    #TrackTrace -telemetryScope $telemetryScope
+    TrackTrace -telemetryScope $telemetryScope
 }
 catch {
     Write-Error -message "Pull changes failed.$([environment]::Newline)Error: $($_.Exception.Message)$([environment]::Newline)Stacktrace: $($_.scriptStackTrace)"
-    #TrackException -telemetryScope $telemetryScope -errorRecord $_
+    TrackException -telemetryScope $telemetryScope -errorRecord $_
 }
 finally {
     if (Test-Path $TempLocation) {

@@ -42,7 +42,7 @@ runs:
 
       - name: Parse DeployToSettings and AuthContext
         shell: ${{ inputs.shell }}
-        run: ${{ github.action_path }}/ParseDeploymentAndAuthSettings.ps1 -deployToSettings '${{ inputs.deploySettings }}'' -authContext '${{ inputs.authSettings }}'
+        run: ${{ github.action_path }}/ParseDeploymentAndAuthSettings.ps1 -deployToSettings '${{ inputs.deploySettings }}' -authContext '${{ inputs.authSettings }}'
 
       - name: Who am I
         uses: microsoft/powerplatform-actions/who-am-i@v0

@@ -1156,6 +1156,7 @@ function CommitFromNewFolder {
         [string] $commitMessage,
         [string] $branch
     )
+    Get-ChildItem
 
     invoke-git add *
     if ($commitMessage.Length -gt 250) {

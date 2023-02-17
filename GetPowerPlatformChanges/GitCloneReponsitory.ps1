@@ -12,7 +12,7 @@ Param(
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version 2.0
 $telemetryScope = $ParentTelemetryScopeJson;
-Write-Host "Starting GitCloneRepository.ps1 with parameters: $([environment]::Newline)Actor: $Actor$([environment]::Newline)Token: $Token$([environment]::Newline)ParentTelemetryScopeJson: $ParentTelemetryScopeJson$([environment]::Newline)TempLocation: $TempLocation$([environment]::Newline)SourceLocation: $SourceLocation$([environment]::Newline)DirectCommit: $DirectCommit"
+Write-Host "Starting GitCloneRepository.ps1 with parameters: $([environment]::Newline)Actor: $Actor$([environment]::Newline)Token: $Token$([environment]::Newline)ParentTelemetryScopeJson: $ParentTelemetryScopeJson$([environment]::Newline)DirectCommit: $DirectCommit"
 
 # Import the helper script
 . (Join-Path -Path $PSScriptRoot -ChildPath "..\AL-Go-Helper.ps1" -Resolve)
@@ -29,7 +29,7 @@ try {
     Write-Host "Cloning the repository into a new folder"
     $serverUrl = CloneIntoNewFolder -Actor $GitHubActor -Token $GitHubToken -Branch $gitHubBranch
     $baseFolder = (Get-Location).Path
-    
+
     Add-Content -Path $env:GITHUB_ENV -Value "clonedRepoPath=$baseFolder"
     Add-Content -Path $env:GITHUB_ENV -Value "serverUrl=$serverUrl"
     Add-Content -Path $env:GITHUB_ENV -Value "gitHubBranch=$gitHubBranch"

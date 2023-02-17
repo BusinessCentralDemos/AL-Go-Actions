@@ -27,7 +27,7 @@ try {
     }
     
     Write-Host "Cloning the repository into a new folder"
-    $serverUrl = CloneIntoNewFolder -Actor $GitHubActor -Token $GitHubToken -Branch $gitHubBranch
+    $serverUrl = CloneIntoNewFolder -Actor $Actor -Token $Token -Branch $gitHubBranch
     $baseFolder = (Get-Location).Path
 
     Add-Content -Path $env:GITHUB_ENV -Value "clonedRepoPath=$baseFolder"

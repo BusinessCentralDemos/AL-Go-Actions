@@ -5,6 +5,8 @@ Param(
     [string] $Token,
     [Parameter(HelpMessage = "Specifies the parent telemetry scope for the telemetry signal", Mandatory = $false)]
     [string] $ParentTelemetryScopeJson = '7b7d',
+    [Parameter(HelpMessage = "The name of the environment as defined in GitHub", Mandatory = $false)]
+    [string] $EnvironmentName,
     [Parameter(HelpMessage = "The current location for files to be checked in", Mandatory = $false)]
     [string] $TempLocation,
     [Parameter(HelpMessage = "The relative folder location of the PowerPlatform solution in the repository", Mandatory = $false)]
@@ -89,7 +91,7 @@ Function CloneAndCommit {
     ls $baseFolder\$PowerPlatformSolutionName;
     ls ;
 
-    CommitFromNewFolder -ServerUrl $serverUrl -CommitMessage "Upadte solution: ($PowerPlatformSolutionName)" -Branch $gitHubBranch
+    CommitFromNewFolder -ServerUrl $serverUrl -CommitMessage "Update solution: $PowerPlatformSolutionName with latest from environment: $EnvironmentName" -Branch $gitHubBranch
 }
         
 # IMPORTANT: No code that can fail should be outside the try/catch

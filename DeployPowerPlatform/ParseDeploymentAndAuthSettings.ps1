@@ -30,8 +30,10 @@ function ParseDeployToSettings {
 function ParseAuthContext {
     param(
         [Parameter(Mandatory=$true)]
-        [string]$authContextString
+        [string]$authContextData
     )
+    
+    $authContextString = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($authContextData))
     $authContextObject = ConvertFrom-Json $authContextString
 
     # Check which set of properties is present and assign to local variables accordingly

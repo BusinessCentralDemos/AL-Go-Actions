@@ -82,7 +82,7 @@ runs:
 
       - name: Commit to git (not working yet)
         shell: ${{ inputs.shell }}
-        run: ${{ github.action_path }}\GitCommitChanges.ps1 -Actor ${{ inputs.actor }} -Token ${{ inputs.token }} -ParentTelemetryScopeJson ${{ inputs.parentTelemetryScopeJson }} -EnvironmentName ${{ env.environmentName }} -Location ${{ env.clonedRepoPath }} -ServerUrl ${{ env.serverUrl }} -GitHubBranch ${{ env.gitHubBranch }}
+        run: ${{ github.action_path }}\GitCommitChanges.ps1 -Actor ${{ inputs.actor }} -Token ${{ inputs.token }} -ParentTelemetryScopeJson ${{ inputs.parentTelemetryScopeJson }} -EnvironmentName '${{ env.environmentName }}'' -Location '${{ env.clonedRepoPath }}'' -ServerUrl '${{ env.serverUrl }}' -GitHubBranch '${{ env.gitHubBranch }}'
 
 branding:
   icon: terminal

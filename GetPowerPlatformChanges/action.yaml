@@ -37,13 +37,14 @@ inputs:
 runs:
   using: composite
   steps:
-      - name: Set up temporary folder
-        shell: ${{ inputs.shell }}
-        run: mkdir -p powerPlatform/tempPullChanges
-
       - name: Parse DeployToSettings and AuthContext
         shell: ${{ inputs.shell }}
         run: ${{ github.action_path }}/ParseDeploymentAndAuthSettings.ps1 -deployToSettings '${{ inputs.deploySettings }}' -authContext '${{ inputs.authSettings }}'
+
+      - name: Set up new branch for changes
+        shell: ${{ inputs.shell }}
+        run: ${{ github.action_path }}/GitCloneRepositoy.ps1 -Actor '${{ inputs.actor }}' -Token ${{ inputs.token }} -ParentTelemetryScopeJson ${{inputs.parentTelemetryScopeJson}} -DirectCommit '${{ inputs.directCommit }}'
+
 
       - name: Who am I
         uses: microsoft/powerplatform-actions/who-am-i@v0
@@ -83,7 +84,7 @@ runs:
 
       - name: Commit to git (not working yet)
         shell: ${{ inputs.shell }}
-        run: ${{ github.action_path }}\GitHubCommitChanges.ps1 -actor '${{ inputs.actor }}' -token ${{ inputs.token }} -parentTelemetryScopeJson ${{ inputs.parentTelemetryScopeJson }} -environmentName '${{env.environmentName}}' -tempLocation 'powerPlatform/tempPullChanges/${{ inputs.solutionName }}' -sourceLocation '${{ inputs.solutionName }}' -directCommit ${{ inputs.directCommit }}
+        run: ${{ github.action_path }}/GitHubCommitChanges.ps1 -Actor ${{ inputs.actor }} -Token ${{ inputs.token }} -ParentTelemetryScopeJson ${{ inputs.parentTelemetryScopeJson }} -EnvironmentName ${{ env.environmentName }} -Location ${{ env.Location }} -ServerUrl ${{ env.ServerUrl }} -GitHubBranch ${{ env.GitHubBranch }}
 
 branding:
   icon: terminal

@@ -6,6 +6,8 @@ Param(
     [Parameter(HelpMessage = "Specifies the parent telemetry scope for the telemetry signal", Mandatory = $false)]
     [string] $ParentTelemetryScopeJson = '7b7d',
     [Parameter(HelpMessage = "The name of the environment as defined in GitHub", Mandatory = $false)]
+    [string] $PowerPlatformSolutionName,
+    [Parameter(HelpMessage = "The name of the environment as defined in GitHub", Mandatory = $false)]
     [string] $EnvironmentName,
     [Parameter(HelpMessage = "The current location for files to be checked in", Mandatory = $false)]
     [string] $Location,

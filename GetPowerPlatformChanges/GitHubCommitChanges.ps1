@@ -51,6 +51,7 @@ Function Copy-Files {
     Write-Host "Copying files from $Source to $Destination"
     Get-ChildItem $Source | ForEach-Object {
         $destinationPath = Join-Path $Destination $_.Name
+        write-host "Copying file: $($_.FullName) to $destinationPath"
         Copy-Item $_.FullName $destinationPath
     }
 }

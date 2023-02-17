@@ -63,4 +63,4 @@ Write-Host "Parse deployment settings"
 ParseDeployToSettings -deployToSettingString $deployToSettings
 
 Write-Host "Parse authentication context"
-ParseAuthContext -authContextString $authContext
+ParseAuthContext -authContextData $authContext

@@ -33,13 +33,12 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: test input
+    - name: Write out inputs
       shell: ${{ inputs.shell }}
       run: |
         Write-Host "Deploy settings: ${{ inputs.deploySettings }}";
         Write-Host "Auth settings: ${{ inputs.authSettings }}";
         Write-Host "Artifact: ${{ inputs.artifactPath }}";  
-        Write-Host "Temp folder: ${{ env.tempFolder }}";  
         Get-ChildItem -Recurse -Path "${{ inputs.artifactPath }}"
         
     - name: findSolutionFile
@@ -69,27 +68,9 @@ runs:
       shell: ${{ inputs.shell }}
       run: ls .artifacts/tempPPSolution/source
     
-    - name: Parse deployTo JSON
+    - name: Parse DeployToSettings and AuthContext
       shell: ${{ inputs.shell }}
-      run: |
-        $json = '${{ inputs.deploySettings }}'
-        $obj = ConvertFrom-Json $json
-
-        $environmentName = $obj.environmentName;
-        Write-Output $environmentName
-        echo "environmentName=$environmentName" >> $env:GITHUB_ENV
-
-        $environmentUrl = $obj.'environment-url';
-        Write-Output $environmentUrl
-        echo "environmentUrl=$environmentUrl" >> $env:GITHUB_ENV
-        
-        $bcEnvironment = $obj.bcEnvironment;
-        Write-Output $bcEnvironment
-        echo "bcEnvironment=$bcEnvironment" >> $env:GITHUB_ENV
-
-        $bcCompanyId = $obj.bcCompanyId;
-        write-output $bcCompanyId
-        echo "bcCompanyId=$bcCompanyId" >> $env:GITHUB_ENV
+      run: ${{ github.action_path }}/ParseDeploymentAndAuthSettings.ps1 -deploySettings ${{ inputs.deploySettings }} -authSettings ${{ inputs.authSettings }}
 
     - name: Rebuild solution
       uses: BusinessCentralDemos/AL-Go-Actions/BuildPowerPlatform@PowerPlatform
@@ -99,19 +80,7 @@ runs:
         solutionFolder: .artifacts/tempPPSolution/source
         outputFolder: .artifacts/tempPPSolution
         outputFileName: ppsolution
-        
-    - name: Parse auth context
-      shell: ${{ inputs.shell }}
-      run: |
-          $authContext = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('${{  inputs.authSettings }}'))
-          $obj = ConvertFrom-Json $authContext
-          $userName = $obj.userName;
-          Write-Output "userName=$userName"
-          echo "userName=$userName" >> $env:GITHUB_ENV
-          $password = $obj.password;
-          Write-Output "password=$password"
-          echo "password=$password" >> $env:GITHUB_ENV
-
+  
     - name: Who am I
       uses: microsoft/powerplatform-actions/who-am-i@v0
       with:

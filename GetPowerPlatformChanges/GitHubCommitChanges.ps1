@@ -94,7 +94,7 @@ Function CloneAndCommit {
         
 # IMPORTANT: No code that can fail should be outside the try/catch
 try {
-    CloneAndCommit -GitHubActor $Actor -GitHubToken $Token -CreateNewBranch ($DirectCommit -eq "y") -PowerPlatformSolutionName $SourceLocation
+    CloneAndCommit -GitHubActor $Actor -GitHubToken $Token -CreateNewBranch ($DirectCommit -eq "false") -PowerPlatformSolutionName $SourceLocation
     #TrackTrace -telemetryScope $telemetryScope
 }
 catch {

@@ -29,9 +29,10 @@ inputs:
     required: false
     default: '{}'
   directCommit: 
-    description: (N/Y) If Y, the changes will be committed directly to the branch. If N, the changes will be committed to a branch named after the solution.
+    type: boolean
+    description: If true, the changes will be committed directly to the branch. If not, the changes will be committed to a branch named after the solution.
     required: false
-    default: N
+    default: false
 
 runs:
   using: composite

@@ -31,6 +31,10 @@ Write-Host "Starting GitHubCommitChanges.ps1 with parameters: $([environment]::N
 try {
     Set-Location -Path $Location
 
+    # Environment variables for hub commands
+    $env:GITHUB_USER = $Actor
+    $env:GITHUB_TOKEN = $Token
+
     # Commit from the new folder
     write-host "Committing changes from the new folder $Location\$PowerPlatformSolutionName"
     CommitFromNewFolder -ServerUrl $serverUrl -CommitMessage "Update solution: $PowerPlatformSolutionName with latest from environment: $EnvironmentName" -Branch $gitHubBranch

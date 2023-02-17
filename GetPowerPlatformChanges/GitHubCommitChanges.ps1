@@ -85,12 +85,12 @@ Function CloneAndCommit {
             
     Copy-Files -Source $fullTempLocation -Destination "$baseFolder\$PowerPlatformSolutionName"
             
-    # Commit from the new folder
-    write-host "Committing changes from the new folder $baseFolder\$PowerPlatformSolutionName"
-    
+    Write-Host "Files copied to $baseFolder\$PowerPlatformSolutionName"    
     Get-ChildItem $baseFolder\$PowerPlatformSolutionName;
     Get-ChildItem ;
-
+    
+    # Commit from the new folder
+    write-host "Committing changes from the new folder $baseFolder\$PowerPlatformSolutionName"
     CommitFromNewFolder -ServerUrl $serverUrl -CommitMessage "Update solution: $PowerPlatformSolutionName with latest from environment: $EnvironmentName" -Branch $gitHubBranch
 }
         

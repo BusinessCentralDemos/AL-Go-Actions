@@ -45,7 +45,6 @@ runs:
         shell: ${{ inputs.shell }}
         run: ${{ github.action_path }}/GitCloneRepositoy.ps1 -Actor '${{ inputs.actor }}' -Token ${{ inputs.token }} -ParentTelemetryScopeJson ${{inputs.parentTelemetryScopeJson}} -DirectCommit '${{ inputs.directCommit }}'
 
-
       - name: Who am I
         uses: microsoft/powerplatform-actions/who-am-i@v0
         with:
@@ -60,27 +59,26 @@ runs:
           password-secret: ${{env.password}}
           environment-url: ${{env.environmentUrl}}
           solution-name: ${{inputs.solutionName}}
-          solution-output-file: powerPlatform/tempPullChanges\${{inputs.solutionName}}.zip
+          solution-output-file: ${{env.clonedRepoPath}}/${{inputs.solutionName}}.zip
 
       - name: unpack-solution action
         uses: microsoft/powerplatform-actions/unpack-solution@v0
         with:
-          solution-file: powerPlatform/tempPullChanges\${{inputs.solutionName}}.zip
-          solution-folder: powerPlatform/tempPullChanges\${{inputs.solutionName}}
+          solution-file: ${{env.clonedRepoPath}}/${{inputs.solutionName}}.zip
+          solution-folder: ${{env.clonedRepoPath}}/${{inputs.solutionName}}
           solution-type: "Unmanaged"
           overwrite-files: true
           process-canvas-apps: true
 
       - name: Remove zip file
         shell: ${{ inputs.shell }}
-        run: rm powerPlatform/tempPullChanges\${{inputs.solutionName}}.zip
+        run: rm ${{env.clonedRepoPath}}/${{inputs.solutionName}}.zip
 
       - name: Test output
         shell: ${{ inputs.shell }}
         run: |
-          write-output "DirectCommit: ${{ inputs.directCommit }}"
-          ls powerPlatform/tempPullChanges\${{inputs.solutionName}}
-          ls powerPlatform/tempPullChanges
+          ls ${{env.clonedRepoPath}}/${{inputs.solutionName}}
+          ls ${{env.clonedRepoPath}}
 
       - name: Commit to git (not working yet)
         shell: ${{ inputs.shell }}

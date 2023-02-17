@@ -1156,6 +1156,11 @@ function CommitFromNewFolder {
         [string] $commitMessage,
         [string] $branch
     )
+    Write-Host "************"
+    Write-Host "Start commit"
+    Write-Host "************"
+    Write-Host $PSScriptRoot 
+
     Get-ChildItem
 
     invoke-git add *

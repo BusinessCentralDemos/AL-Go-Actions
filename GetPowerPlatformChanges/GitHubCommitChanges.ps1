@@ -39,22 +39,6 @@ function GetFullPath() {
     return $tempFullPath;
 }
 
-Function Copy-Files {
-    [CmdletBinding()]
-    Param (
-        [Parameter(Mandatory = $true)]
-        [string]$Source,
-        [Parameter(Mandatory = $true)]
-        [string]$Destination
-    )
-        
-    Write-Host "Copying files from $Source to $Destination"
-    Get-ChildItem $Source | ForEach-Object {
-        $destinationPath = Join-Path $Destination $_.Name
-        write-host "Copying file: $($_.FullName) to $destinationPath"
-        Copy-Item $_.FullName $destinationPath
-    }
-}
     
 Function CloneAndCommit {
     [CmdletBinding()]
@@ -83,21 +67,20 @@ Function CloneAndCommit {
             
     $baseFolder = (Get-Location).Path
     Set-Location $baseFolder
-            
-    Copy-Files -Source $fullTempLocation -Destination "$baseFolder\$PowerPlatformSolutionName"
-    
-    # debug section - remove later
 
+    Write-Host "Copi files from $fullTempLocation to $baseFolder\$PowerPlatformSolutionName"
+    Copy-Item -Path $fullTempLocation -Destination "$baseFolder\$PowerPlatformSolutionName" -Recurse
+
+    # debug section - remove later
     Write-Host "Files copied to $baseFolder\$PowerPlatformSolutionName"    
     Get-ChildItem $baseFolder\$PowerPlatformSolutionName;
     Get-ChildItem ;
 
     Write-Host "Check content of file in $baseFolder\$PowerPlatformSolutionName"
-    write-host Get-Content -Path "$baseFolder\$PowerPlatformSolutionName\PPSolution\CanvasApps\src\cr301_testpowerapp_3661a\Src\Screen1.fx.yaml"
+    Get-Content -Path "$baseFolder\$PowerPlatformSolutionName\PPSolution\CanvasApps\src\cr301_testpowerapp_3661a\Src\Screen1.fx.yaml"
     
     Write-Host "Check content of file in $fullTempLocation"
-    write-host Get-Content -Path "$fullTempLocation\PPSolution\CanvasApps\src\cr301_testpowerapp_3661a\Src\Screen1.fx.yaml"
-
+    Get-Content -Path "$fullTempLocation\PPSolution\CanvasApps\src\cr301_testpowerapp_3661a\Src\Screen1.fx.yaml"
     # debug section - remove later
 
     # Commit from the new folder

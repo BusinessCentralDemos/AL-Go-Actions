@@ -70,14 +70,22 @@ runs:
           overwrite-files: true
           process-canvas-apps: true
 
-      - name: Remove zip file
-        shell: ${{ inputs.shell }}
-        run: rm ${{env.clonedRepoPath}}/${{inputs.solutionName}}.zip
-
       - name: Test output
         shell: ${{ inputs.shell }}
         run: |
           ls ${{env.clonedRepoPath}}/${{inputs.solutionName}}
+          ls ${{env.clonedRepoPath}}/${{inputs.solutionName}}/CanvasApps
+          ls ${{env.clonedRepoPath}}
+
+      - name: Remove zip file
+        shell: ${{ inputs.shell }}
+        run: rm ${{env.clonedRepoPath}}/${{inputs.solutionName}}.zip
+
+      - name: Test output2
+        shell: ${{ inputs.shell }}
+        run: |
+          ls ${{env.clonedRepoPath}}/${{inputs.solutionName}}
+          ls ${{env.clonedRepoPath}}/${{inputs.solutionName}}/CanvasApps
           ls ${{env.clonedRepoPath}}
 
       - name: Commit to git (not working yet)

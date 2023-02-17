@@ -30,7 +30,7 @@ try {
     Set-Location -Path $Location
 
     # Commit from the new folder
-    write-host "Committing changes from the new folder $baseFolder\$PowerPlatformSolutionName"
+    write-host "Committing changes from the new folder $Location\$PowerPlatformSolutionName"
     CommitFromNewFolder -ServerUrl $serverUrl -CommitMessage "Update solution: $PowerPlatformSolutionName with latest from environment: $EnvironmentName" -Branch $gitHubBranch
     # TODO: Why can we not find the trackTrace function?
     #TrackTrace -telemetryScope $telemetryScope

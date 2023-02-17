@@ -20,15 +20,14 @@ inputs:
   solutionName:
     description: The Power Platform solution to get the changes from.
     required: true
-  password: 
-    description: The password to use to connect to the Power Platform environment.
-    required: true
-  userName: 
-    description: The user name to use to connect to the Power Platform environment.
-    required: true
-  environmentUrl:
-    description: The URL to the Power Platform environment.
-    required: true
+  deploySettings: 
+    description: The deploy settings
+    required: false
+    default: '{}'
+  authSettings: 
+    description: The auth settings
+    required: false
+    default: '{}'
   directCommit: 
     description: (N/Y) If Y, the changes will be committed directly to the branch. If N, the changes will be committed to a branch named after the solution.
     required: false
@@ -40,6 +39,10 @@ runs:
       - name: Set up temporary folder
         shell: ${{ inputs.shell }}
         run: mkdir -p powerPlatform/tempPullChanges
+
+      - name: Parse DeployToSettings and AuthContext
+        shell: ${{ inputs.shell }}
+        run: ${{ github.action_path }}/ParseDeploymentAndAuthSettings.ps1 -deployToSettings '${{ inputs.deploySettings }}'' -authContext '${{ inputs.authSettings }}'
 
       - name: Who am I
         uses: microsoft/powerplatform-actions/who-am-i@v0

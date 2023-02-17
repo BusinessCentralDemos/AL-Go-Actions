@@ -18,6 +18,9 @@ Set-StrictMode -Version 2.0
 $telemetryScope = $ParentTelemetryScopeJson;
 Write-Host "Starting GitHubCommitChanges.ps1 with parameters: $([environment]::Newline)Actor: $Actor$([environment]::Newline)Token: $Token$([environment]::Newline)ParentTelemetryScopeJson: $ParentTelemetryScopeJson$([environment]::Newline)TempLocation: $TempLocation$([environment]::Newline)SourceLocation: $SourceLocation$([environment]::Newline)DirectCommit: $DirectCommit"
 
+# Import the helper script
+. (Join-Path -Path $PSScriptRoot -ChildPath "..\AL-Go-Helper.ps1" -Resolve)
+
 function GetFullPath() {
     [CmdletBinding()]
     Param (
@@ -64,9 +67,6 @@ Function CloneAndCommit {
     )
 
     $fullTempLocation = GetFullPath -Path $TempLocation;
-        
-    # Import the helper script
-    . (Join-Path -Path $PSScriptRoot -ChildPath "..\AL-Go-Helper.ps1" -Resolve)
         
     $gitHubBranch = "";
     if ($CreateNewBranch) {

@@ -54,13 +54,15 @@ function ParseAuthContext {
         Add-Content -Path $env:GITHUB_ENV -Value "clientSecret=$clientSecret"
 
     } else {
-        Write-Host "Invalid input: JSON object must contain either 'userName' and 'password' properties or 'applicationId' and 'clientSecret' properties"
+        Write-Warning "Invalid input: JSON object must contain either 'userName' and 'password' properties or 'applicationId' and 'clientSecret' properties"
         return;
     }
 }
 
 Write-Host "Parse deployment settings"
+Write-Host "*******************************************************************************************"
 ParseDeployToSettings -deployToSettingString $deployToSettings
 
 Write-Host "Parse authentication context"
+Write-Host "*******************************************************************************************"
 ParseAuthContext -authContextData $authContext

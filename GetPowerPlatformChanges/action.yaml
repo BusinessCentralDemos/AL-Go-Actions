@@ -41,17 +41,22 @@ runs:
         shell: ${{ inputs.shell }}
         run: ${{ github.action_path }}\ParseDeploymentAndAuthSettings.ps1 -deployToSettings '${{ inputs.deploySettings }}' -authContext '${{ inputs.authSettings }}'
 
-      - name: Set up new branch for changes
-        shell: ${{ inputs.shell }}
-        run: ${{ github.action_path }}\GitCloneReponsitory.ps1 -Actor '${{ inputs.actor }}' -Token ${{ inputs.token }} -ParentTelemetryScopeJson ${{inputs.parentTelemetryScopeJson}} -DirectCommit '${{ inputs.directCommit }}'
+      - name: Print environment variables
+        run: |
+            echo "environmentUrl: ${{ env.environmentUrl }}"
+            echo "userName: ${{ env.userName }}"
+            echo "password: ${{ env.password }}"
+            echo "tenantId: ${{ env.tenantId }}"
+            echo "applicationId: ${{ env.applicationId }}"
+            echo "clientSecret: ${{ env.clientSecret }}"
 
       - name: Who am I (username)
         if: ${{ env.userName != '' }}
         uses: microsoft/powerplatform-actions/who-am-i@v0
         with:
+          environment-url: ${{env.environmentUrl}}
           user-name: ${{env.userName}}
           password-secret: ${{env.password}}
-          environment-url: ${{env.environmentUrl}}
 
       - name: Who am I (application ID)
         if: ${{ env.applicationId != '' }}
@@ -59,8 +64,12 @@ runs:
         with:
           environment-url: ${{env.environmentUrl}}
           tenant-id: ${{env.tenantId}}
-          client-secret: ${{env.clientSecret}}
           app-id: ${{env.applicationId}}
+          client-secret: ${{env.clientSecret}}
+
+      - name: Set up new branch for changes
+        shell: ${{ inputs.shell }}
+        run: ${{ github.action_path }}\GitCloneReponsitory.ps1 -Actor '${{ inputs.actor }}' -Token ${{ inputs.token }} -ParentTelemetryScopeJson ${{inputs.parentTelemetryScopeJson}} -DirectCommit '${{ inputs.directCommit }}'
 
       - name: export-solution action
         uses: microsoft/powerplatform-actions/export-solution@v0
@@ -80,25 +89,11 @@ runs:
           overwrite-files: false
           process-canvas-apps: true
 
-      - name: Test output
-        shell: ${{ inputs.shell }}
-        run: |
-          ls ${{env.clonedRepoPath}}/${{inputs.solutionName}}
-          ls ${{env.clonedRepoPath}}/${{inputs.solutionName}}/CanvasApps
-          ls ${{env.clonedRepoPath}}
-
       - name: Remove zip file
         shell: ${{ inputs.shell }}
         run: rm ${{env.clonedRepoPath}}/${{inputs.solutionName}}.zip
 
-      - name: Test output2
-        shell: ${{ inputs.shell }}
-        run: |
-          ls ${{env.clonedRepoPath}}/${{inputs.solutionName}}
-          ls ${{env.clonedRepoPath}}/${{inputs.solutionName}}/CanvasApps
-          ls ${{env.clonedRepoPath}}
-
-      - name: Commit to git (not working yet)
+      - name: Commit to git repository
         shell: ${{ inputs.shell }}
         run: ${{ github.action_path }}\GitCommitChanges.ps1 -Actor ${{ inputs.actor }} -Token ${{ inputs.token }} -ParentTelemetryScopeJson ${{ inputs.parentTelemetryScopeJson }} -EnvironmentName '${{ env.environmentName }}' -PowerPlatformSolutionName ${{inputs.solutionName}} -Location '${{ env.clonedRepoPath }}' -ServerUrl '${{ env.serverUrl }}' -GitHubBranch '${{ env.gitHubBranch }}'
 

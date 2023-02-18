@@ -41,16 +41,6 @@ runs:
         shell: ${{ inputs.shell }}
         run: ${{ github.action_path }}\ParseDeploymentAndAuthSettings.ps1 -deployToSettings '${{ inputs.deploySettings }}' -authContext '${{ inputs.authSettings }}'
 
-      - name: Print environment variables
-        shell: ${{ inputs.shell }}
-        run: |
-            echo "environmentUrl: ${{ env.environmentUrl }}"
-            echo "userName: ${{ env.userName }}"
-            echo "password: ${{ env.password }}"
-            echo "tenantId: ${{ env.tenantId }}"
-            echo "applicationId: ${{ env.applicationId }}"
-            echo "clientSecret: ${{ env.clientSecret }}"
-
       - name: Who am I (username)
         if: ${{ env.userName != '' }}
         uses: microsoft/powerplatform-actions/who-am-i@v0
@@ -73,6 +63,7 @@ runs:
         run: ${{ github.action_path }}\GitCloneReponsitory.ps1 -Actor '${{ inputs.actor }}' -Token ${{ inputs.token }} -ParentTelemetryScopeJson ${{inputs.parentTelemetryScopeJson}} -DirectCommit '${{ inputs.directCommit }}'
 
       - name: export-solution action (username)
+        if: ${{ env.userName != '' }}
         uses: microsoft/powerplatform-actions/export-solution@v0
         with:
           user-name: ${{env.userName}}
@@ -82,6 +73,7 @@ runs:
           solution-output-file: ${{env.clonedRepoPath}}/${{inputs.solutionName}}.zip
 
       - name: export-solution action (application ID)
+        if: ${{ env.applicationId != '' }}
         uses: microsoft/powerplatform-actions/export-solution@v0
         with:
           environment-url: ${{env.environmentUrl}}

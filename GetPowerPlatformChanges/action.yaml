@@ -45,11 +45,18 @@ runs:
         shell: ${{ inputs.shell }}
         run: ${{ github.action_path }}\GitCloneReponsitory.ps1 -Actor '${{ inputs.actor }}' -Token ${{ inputs.token }} -ParentTelemetryScopeJson ${{inputs.parentTelemetryScopeJson}} -DirectCommit '${{ inputs.directCommit }}'
 
-      - name: Who am I
+      - name: Who am I (username)
+        if: ${{ env.userName != '' }}
         uses: microsoft/powerplatform-actions/who-am-i@v0
         with:
           user-name: ${{env.userName}}
           password-secret: ${{env.password}}
+          environment-url: ${{env.environmentUrl}}
+
+      - name: Who am I (application ID)
+        if: ${{ env.applicationId != '' }}
+        uses: microsoft/powerplatform-actions/who-am-i@v0
+        with:
           environment-url: ${{env.environmentUrl}}
           tenant-id: ${{env.tenantId}}
           client-secret: ${{env.clientSecret}}

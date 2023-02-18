@@ -42,6 +42,7 @@ runs:
         run: ${{ github.action_path }}\ParseDeploymentAndAuthSettings.ps1 -deployToSettings '${{ inputs.deploySettings }}' -authContext '${{ inputs.authSettings }}'
 
       - name: Print environment variables
+        shell: ${{ inputs.shell }}
         run: |
             echo "environmentUrl: ${{ env.environmentUrl }}"
             echo "userName: ${{ env.userName }}"

@@ -53,7 +53,16 @@ runs:
         tenant-id: ${{env.tenantId}}
         app-id: ${{env.applicationId}}
         client-secret: ${{env.clientSecret}}
-        
+    
+    - name: Temp - write out files
+      shell: ${{ inputs.shell }}
+      run: |
+            $filePath = Get-ChildItem -Path $path -Recurse -File | Select-Object -ExpandProperty FullName
+            Write-Host "Temp - write out files"
+            foreach($file in $filePath){
+                Write-Host $file
+            }
+
     - name: findSolutionFile
       shell: ${{ inputs.shell }}
       run: |
@@ -67,6 +76,8 @@ runs:
                     return;
                 }
             }
+            Write-Warning "No match found"
+            return 1;
   
     - name: Unpack solution artifact
       uses: microsoft/powerplatform-actions/unpack-solution@v0

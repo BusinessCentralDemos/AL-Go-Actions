@@ -72,12 +72,22 @@ runs:
         shell: ${{ inputs.shell }}
         run: ${{ github.action_path }}\GitCloneReponsitory.ps1 -Actor '${{ inputs.actor }}' -Token ${{ inputs.token }} -ParentTelemetryScopeJson ${{inputs.parentTelemetryScopeJson}} -DirectCommit '${{ inputs.directCommit }}'
 
-      - name: export-solution action
+      - name: export-solution action (username)
         uses: microsoft/powerplatform-actions/export-solution@v0
         with:
           user-name: ${{env.userName}}
           password-secret: ${{env.password}}
           environment-url: ${{env.environmentUrl}}
+          solution-name: ${{inputs.solutionName}}
+          solution-output-file: ${{env.clonedRepoPath}}/${{inputs.solutionName}}.zip
+
+      - name: export-solution action (application ID)
+        uses: microsoft/powerplatform-actions/export-solution@v0
+        with:
+          environment-url: ${{env.environmentUrl}}
+          tenant-id: ${{env.tenantId}}
+          app-id: ${{env.applicationId}}
+          client-secret: ${{env.clientSecret}}
           solution-name: ${{inputs.solutionName}}
           solution-output-file: ${{env.clonedRepoPath}}/${{inputs.solutionName}}.zip
 

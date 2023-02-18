@@ -33,13 +33,26 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Write out inputs
+    - name: Parse DeployToSettings and AuthContext
       shell: ${{ inputs.shell }}
-      run: |
-        Write-Host "Deploy settings: ${{ inputs.deploySettings }}";
-        Write-Host "Auth settings: ${{ inputs.authSettings }}";
-        Write-Host "Artifact: ${{ inputs.artifactPath }}";  
-        Get-ChildItem -Recurse -Path "${{ inputs.artifactPath }}"
+      run: ${{ github.action_path }}/ParseDeploymentAndAuthSettings.ps1 -deployToSettings '${{ inputs.deploySettings }}' -authContext '${{ inputs.authSettings }}'
+
+    - name: Who am I (username)
+      if: ${{ env.userName != '' }}
+      uses: microsoft/powerplatform-actions/who-am-i@v0
+      with:
+        environment-url: ${{env.environmentUrl}}
+        user-name: ${{env.userName}}
+        password-secret: ${{env.password}}
+
+    - name: Who am I (application ID)
+      if: ${{ env.applicationId != '' }}
+      uses: microsoft/powerplatform-actions/who-am-i@v0
+      with:
+        environment-url: ${{env.environmentUrl}}
+        tenant-id: ${{env.tenantId}}
+        app-id: ${{env.applicationId}}
+        client-secret: ${{env.clientSecret}}
         
     - name: findSolutionFile
       shell: ${{ inputs.shell }}
@@ -61,16 +74,7 @@ runs:
         solution-file: ${{ env.powerPlatformSolutionPath }}
         solution-folder: .artifacts/tempPPSolution/source
         solution-type: "Unmanaged"
-        overwrite-files: true
         process-canvas-apps: true
-    
-    - name: see files
-      shell: ${{ inputs.shell }}
-      run: ls .artifacts/tempPPSolution/source
-    
-    - name: Parse DeployToSettings and AuthContext
-      shell: ${{ inputs.shell }}
-      run: ${{ github.action_path }}/ParseDeploymentAndAuthSettings.ps1 -deployToSettings '${{ inputs.deploySettings }}' -authContext '${{ inputs.authSettings }}'
 
     - name: Rebuild solution
       uses: BusinessCentralDemos/AL-Go-Actions/BuildPowerPlatform@PowerPlatform
@@ -80,20 +84,26 @@ runs:
         solutionFolder: .artifacts/tempPPSolution/source
         outputFolder: .artifacts/tempPPSolution
         outputFileName: ppsolution
-  
-    - name: Who am I
-      uses: microsoft/powerplatform-actions/who-am-i@v0
-      with:
-        user-name: ${{env.userName}}
-        password-secret: ${{env.password}}
-        environment-url: ${{env.environmentUrl}}
 
-    - name: Publish solution to Power Platform
+    - name: Publish solution to Power Platform (userName)
+      if: ${{ env.userName != '' }}
       uses: microsoft/powerplatform-actions/import-solution@v0
       with:
         user-name: ${{env.userName}}
         password-secret: ${{env.password}}
         environment-url: ${{env.environmentUrl}}
+        solution-file: .artifacts/tempPPSolution/ppsolution.zip
+        force-overwrite: true
+        publish-changes: true
+
+    - name: Publish solution to Power Platform (ApplicationId)
+      if: ${{ env.applicationId != '' }}
+      uses: microsoft/powerplatform-actions/import-solution@v0
+      with:
+        environment-url: ${{env.environmentUrl}}
+        tenant-id: ${{env.tenantId}}
+        app-id: ${{env.applicationId}}
+        client-secret: ${{env.clientSecret}}
         solution-file: .artifacts/tempPPSolution/ppsolution.zip
         force-overwrite: true
         publish-changes: true

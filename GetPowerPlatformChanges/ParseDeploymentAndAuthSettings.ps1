@@ -1,4 +1,3 @@
-
 param(
     [Parameter(Mandatory = $true)]
     [string]$deployToSettings,
@@ -59,10 +58,12 @@ function ParseAuthContext {
     }
 }
 
+Write-Host "*******************************************************************************************"
 Write-Host "Parse deployment settings"
 Write-Host "*******************************************************************************************"
 ParseDeployToSettings -deployToSettingString $deployToSettings
 
+Write-Host "*******************************************************************************************"
 Write-Host "Parse authentication context"
 Write-Host "*******************************************************************************************"
 ParseAuthContext -authContextData $authContext

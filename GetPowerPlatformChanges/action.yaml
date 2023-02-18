@@ -51,6 +51,9 @@ runs:
           user-name: ${{env.userName}}
           password-secret: ${{env.password}}
           environment-url: ${{env.environmentUrl}}
+          tenant-id: ${{env.tenantId}}
+          client-secret: ${{env.clientSecret}}
+          app-id: ${{env.applicationId}}
 
       - name: export-solution action
         uses: microsoft/powerplatform-actions/export-solution@v0

@@ -67,7 +67,7 @@ runs:
           solution-file: ${{env.clonedRepoPath}}/${{inputs.solutionName}}.zip
           solution-folder: ${{env.clonedRepoPath}}/${{inputs.solutionName}}
           solution-type: "Unmanaged"
-          overwrite-files: true
+          overwrite-files: false
           process-canvas-apps: true
 
       - name: Test output

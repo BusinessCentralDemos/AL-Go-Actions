@@ -58,7 +58,7 @@ runs:
         app-id: ${{env.applicationId}}
         client-secret: ${{env.clientSecret}}
 
-    - name: findSolutionFile
+    - name: Find Power Platform solution file
       shell: ${{ inputs.shell }}
       run: |
             $artifactFiles = Get-ChildItem -Path ${{inputs.artifactPath}} -Recurse -File | Select-Object -ExpandProperty FullName

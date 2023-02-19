@@ -1,5 +1,6 @@
 name: Read Power Platform Settings
 author: Andersg
+inputs:
   shell:
     description: Shell in which you want to run the action (powershell or pwsh)
     required: false
@@ -16,12 +17,14 @@ author: Andersg
     description: The auth settings
     required: false
     default: '{}'
+
 runs:
   using: composite
   steps:
     - name: run
       shell: ${{ inputs.shell }}
       run: ${{ github.action_path }}/ParseDeploymentAndAuthSettings.ps1 -deployToSettings '${{ inputs.deploySettings }}' -authContext '${{ inputs.authSettings }}'
+
 branding:
   icon: terminal
   color: blue

@@ -1,19 +1,18 @@
 # Run pipeline
-Run pipeline in AL-Go repository
+Deploy the Power Platform solution from the artifacts folder
 ## Parameters
+
+### shell (default powershell)
+Shell in which you want to run the action (powershell or pwsh)
 ### actor (default github.actor)
 The GitHub actor running the action
 ### token (default github.token)
 The GitHub token running the action
 ### parentTelemetryScopeJson (default {})
 Specifies the parent telemetry scope for the telemetry signal
-## insiderSasToken (default '')
-Insider Sas token from https://aka.ms/collaborate
-## licenseFileUrl (default '')
-Secure URL for license file
-## appVersion (required)
-Major and Minor part of app Version number
-## appBuild (required)
-Build part of app Version number
-## appRevision (required)
-Revision part of app Version number
+## artifactPath (default '.')
+Patch to the artifacts folder containing power platform solution
+## deploySettings (default {})
+The deploy settings for the power platform solution
+## authSettings (default {})
+The auth settings for the power platform solution

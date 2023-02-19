@@ -81,5 +81,6 @@ function Get-PowerPlatformSolutionFiles {
     return $solutionFiles.FullName;
 }
 
+Write-Host "Updating Power Platform solution files";
 $solutionFiles = Get-PowerPlatformSolutionFiles -solutionFolder $solutionFolder;
 Update-SolutionFiles -appBuild $appBuild -appRevision $appRevision -managed $managed -solutionFiles $solutionFiles;

@@ -34,8 +34,12 @@ runs:
   using: composite
   steps:
     - name: Parse DeployToSettings and AuthContext
-      shell: ${{ inputs.shell }}
-      run: ${{ github.action_path }}/ParseDeploymentAndAuthSettings.ps1 -deployToSettings '${{ inputs.deploySettings }}' -authContext '${{ inputs.authSettings }}'
+      uses: BusinessCentralDemos/AL-Go-Actions/ReadPowerPlatformSettings@PowerPlatform
+      with:
+        shell: ${{ inputs.shell }}
+        parentTelemetryScopeJson: ${{inputs.parentTelemetryScopeJson}}
+        deploySettings: ${{ inputs.deploySettings }} 
+        authSettings: ${{ inputs.authSettings }}
 
     - name: Who am I (username)
       if: ${{ env.userName != '' }}
@@ -58,16 +62,15 @@ runs:
       shell: ${{ inputs.shell }}
       run: |
             $filePaths = Get-ChildItem -Path ${{inputs.artifactPath}} -Recurse -File | Select-Object -ExpandProperty FullName
-            Write-Host "Find Power Platform solution zip"
             foreach($file in $filePaths){
                 if($file.contains("-PowerPlatformSolution-")){
-                    Write-Host "Found match:"$file
+                    Write-Host "Power Platform solution file:"$file
                     ## echo "powerPlatformSolutionPath=$file" >> $env:GITHUB_ENV
                     Add-Content -path $env:GITHUB_ENV -value "powerPlatformSolutionPath=$file" 
                     return;
                 }
             }
-            Write-Warning "No match found"
+            Write-Warning "Not able to find Power Platform solution file in ${{inputs.artifactPath}}"
             return 1;
   
     - name: Unpack solution artifact

@@ -1,4 +1,4 @@
-name: GetPowerPlatformChanges
+name: PullPowerPlatformChanges
 author: Andersg
 inputs:
   shell:

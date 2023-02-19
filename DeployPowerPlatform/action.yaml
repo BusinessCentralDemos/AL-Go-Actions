@@ -70,8 +70,8 @@ runs:
                     return;
                 }
             }            
-            Write-Error "Not able to find Power Platform solution file in ${{inputs.artifactPath}}"
-            throw "Input parameter is missing."
+            Write-Warning "Not able to find Power Platform solution file in ${{inputs.artifactPath}}"
+            throw "Not able to find Power Platform solution file in ${{inputs.artifactPath}}"
   
     - name: Unpack solution artifact
       uses: microsoft/powerplatform-actions/unpack-solution@v0

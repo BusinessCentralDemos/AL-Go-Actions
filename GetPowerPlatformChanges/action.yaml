@@ -38,7 +38,7 @@ runs:
   using: composite
   steps:
       - name: Parse DeployToSettings and AuthContext
-        uses: BusinessCentralDemos/AL-Go-Actions/BuildPowerPlatform@PowerPlatform
+        uses: BusinessCentralDemos/AL-Go-Actions/ReadPowerPlatformSettings@PowerPlatform
         with:
           shell: ${{ inputs.shell }}
           parentTelemetryScopeJson: ${{inputs.parentTelemetryScopeJson}}

@@ -1156,14 +1156,10 @@ function CommitFromNewFolder {
         [string] $commitMessage,
         [string] $branch
     )
-    Write-Host "************"
-    Write-Host "Start commit"
-    Write-Host "************"
     Get-LocalGroup
     Get-ChildItem
 
     invoke-git add * 
-    Write-Host "Commit ended"
     if ($commitMessage.Length -gt 250) {
         $commitMessage = "$($commitMessage.Substring(0,250))...)"
     }

@@ -1,4 +1,4 @@
-# Run pipeline
+# Build Power Platform
 Build the Power Platform solution
 ## Parameters
 ### shell (default powershell)

@@ -1,4 +1,4 @@
-# Run pipeline
+# Deploy Power Platform
 Deploy the Power Platform solution from the artifacts folder
 ## Parameters
 ### shell (default powershell)

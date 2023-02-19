@@ -38,8 +38,12 @@ runs:
   using: composite
   steps:
       - name: Parse DeployToSettings and AuthContext
-        shell: ${{ inputs.shell }}
-        run: ${{ github.action_path }}\ParseDeploymentAndAuthSettings.ps1 -deployToSettings '${{ inputs.deploySettings }}' -authContext '${{ inputs.authSettings }}'
+        uses: BusinessCentralDemos/AL-Go-Actions/BuildPowerPlatform@PowerPlatform
+        with:
+          shell: ${{ inputs.shell }}
+          parentTelemetryScopeJson: ${{inputs.parentTelemetryScopeJson}}
+          deploySettings: ${{ steps.authContext.outputs.deployToSettings }} 
+          authSettings: ${{ steps.authContext.outputs.authContext }}
 
       - name: Who am I (username)
         if: ${{ env.userName != '' }}

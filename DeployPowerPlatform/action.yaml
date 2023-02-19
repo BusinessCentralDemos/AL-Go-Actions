@@ -61,17 +61,17 @@ runs:
     - name: findSolutionFile
       shell: ${{ inputs.shell }}
       run: |
-            $filePaths = Get-ChildItem -Path ${{inputs.artifactPath}} -Recurse -File | Select-Object -ExpandProperty FullName
-            foreach($file in $filePaths){
-                if($file.contains("-PowerPlatformSolution-")){
-                    Write-Host "Power Platform solution file:"$file
-                    ## echo "powerPlatformSolutionPath=$file" >> $env:GITHUB_ENV
-                    Add-Content -path $env:GITHUB_ENV -value "powerPlatformSolutionPath=$file" 
+            $artifactFiles = Get-ChildItem -Path ${{inputs.artifactPath}} -Recurse -File | Select-Object -ExpandProperty FullName
+            foreach($filePath in $artifactFiles){
+                ## Find file containing Power Platform keyword
+                if($filePath.contains("-PowerPlatformSolution-")){
+                    Write-Host "Power Platform solution file:"$filePath
+                    Add-Content -path $env:GITHUB_ENV -value "powerPlatformSolutionPath=$filePath" 
                     return;
                 }
-            }
-            Write-Warning "Not able to find Power Platform solution file in ${{inputs.artifactPath}}"
-            return 1;
+            }            
+            Write-Error "Not able to find Power Platform solution file in ${{inputs.artifactPath}}"
+            throw "Input parameter is missing."
   
     - name: Unpack solution artifact
       uses: microsoft/powerplatform-actions/unpack-solution@v0

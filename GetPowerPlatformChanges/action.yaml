@@ -42,8 +42,8 @@ runs:
         with:
           shell: ${{ inputs.shell }}
           parentTelemetryScopeJson: ${{inputs.parentTelemetryScopeJson}}
-          deploySettings: ${{ steps.authContext.outputs.deployToSettings }} 
-          authSettings: ${{ steps.authContext.outputs.authContext }}
+          deploySettings: ${{ inputs.deploySettings }} 
+          authSettings: ${{ inputs.authSettings }}
 
       - name: Who am I (username)
         if: ${{ env.userName != '' }}

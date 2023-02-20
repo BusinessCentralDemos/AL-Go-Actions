@@ -71,7 +71,7 @@ runs:
                 }
             }            
             Write-Warning "Not able to find Power Platform solution file in ${{inputs.artifactPath}}"
-            throw "Not able to find Power Platform solution file in ${{inputs.artifactPath}}"
+            throw "Not able to find Power Platform solution file in ${{inputs.artifactPath}} that contains the artifact keyword '-PowerPlatformSolution-'"
   
     - name: Unpack solution artifact
       uses: microsoft/powerplatform-actions/unpack-solution@v0
@@ -89,6 +89,8 @@ runs:
         solutionFolder: .artifacts/tempPPSolution/source
         outputFolder: .artifacts/tempPPSolution
         outputFileName: ppsolution
+        companyId: ${{ env.companyId }}
+        environmentName: ${{ env.environmentName }}
 
     - name: Publish solution to Power Platform (userName)
       if: ${{ env.userName != '' }}

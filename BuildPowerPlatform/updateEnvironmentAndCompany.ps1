@@ -1,11 +1,16 @@
 [CmdletBinding()]
 param(
-    [Parameter(Position = 0, mandatory = $true)] [string] $companyId,
-    [Parameter(Position = 1, mandatory = $true)] [string] $environmentName
+    [Parameter(Position = 0, mandatory = $true)] [string] $CompanyId,
+    [Parameter(Position = 1, mandatory = $true)] [string] $EnvironmentName,
+    [Parameter(Position = 2, mandatory = $true)] [string] $SolutionFolder
 )
 
 function getCurrentSettings {
-    $connectionFiles = Get-ChildItem -Recurse -File -Include "Connections.json";    
+    param (
+        [Parameter(Position = 0, mandatory = $true)] [string] $solutionFolder
+    )
+
+    $connectionFiles = Get-ChildItem -Path $solutionFolder -Recurse -File -Include "Connections.json";    
     $currentSettingsList = @();
 
     foreach ($connectionFile in $connectionFiles) {
@@ -32,12 +37,12 @@ function getCurrentSettings {
 
 function replaceOldSettings {
     param(
-        [Parameter(Position = 0, mandatory = $true)] [string] $rootFolder,
+        [Parameter(Position = 0, mandatory = $true)] [string] $solutionFolder,
         [Parameter(Position = 0, mandatory = $true)] [string] $oldSetting,
         [Parameter(Position = 0, mandatory = $true)] [string] $newSetting
     )
 
-    $powerAppFiles = Get-ChildItem -Recurse -File $rootFolder
+    $powerAppFiles = Get-ChildItem -Recurse -File $solutionFolder
     foreach ($file in $powerAppFiles) {
         # only check json and xml files
         if (($file.Extension -eq ".json") -or ($file.Extension -eq ".xml")) {
@@ -53,14 +58,13 @@ function replaceOldSettings {
 
 Write-Host "Updating Business Central environment and company settings";
 
-$currentSettings = getCurrentSettings;
+$currentSettings = getCurrentSettings -solutionFolder $SolutionFolder;
 if ($currentSettings.Count -eq 0) {
-    Write-Error "Could not find connections file";
-    return 2;
+    Write-Warning "Could not find connections file";
+    throw "Could not find connections file";
 }
 
-$newSettings = "$environmentName,$companyId";
-Write-Host "Current settings: "$currentSettings;
+$newSettings = "$EnvironmentName,$CompanyId";
 Write-Host "New settings: "$newSettings;
 
 foreach ($currentSetting in $currentSettings) {
@@ -68,6 +72,7 @@ foreach ($currentSetting in $currentSettings) {
         Write-Host "No changes needed for: "$currentSetting;
         continue;
     }
+
     Write-Host "Updating: "$currentSetting;
-    replaceOldSettings -oldSetting $currentSetting -newSetting $newSettings -rootFolder .;
+    replaceOldSettings -oldSetting $currentSetting -newSetting $newSettings -solutionFolder $SolutionFolder;
 }

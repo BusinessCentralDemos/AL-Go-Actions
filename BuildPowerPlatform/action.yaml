@@ -1,4 +1,4 @@
-name: BuildPowerPlatformSolution
+name: Build Power Platform Solution
 author: Andersg
 inputs:
   shell:
@@ -40,9 +40,12 @@ inputs:
   appBuild:
     description: The app build number
     default: ''
+    required: false
   appRevision: 
     description: The app revision number
     default: '0'
+    required: false
+
     
 runs:
   using: composite
@@ -53,7 +56,7 @@ runs:
       run: |
         ${{ github.action_path }}\updateSolutionFile.ps1 -appBuild ${{inputs.appBuild}} -appRevision ${{inputs.appRevision}} -solutionFolder ${{inputs.solutionFolder}}
     
-    - name: Update BC connection
+    - name: Update BC connection settings
       if: ${{ inputs.companyId != '' }}
       shell: ${{ inputs.shell }}
       run: |

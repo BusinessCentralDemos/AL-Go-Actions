@@ -19,7 +19,8 @@ function Update-VersionNode {
         [Parameter(Position = 2, mandatory = $true)]
         [xml] $xml
     )
-    if ($version) {
+
+    if ($appBuild -and $appRevision) {
         Write-Host "Updating version";
         $versionNode = $xml.SelectSingleNode("//Version");
         $versionNodeText = $versionNode.'#text';
@@ -29,6 +30,9 @@ function Update-VersionNode {
 
         Write-Host "New version: "$newVersionNumber;
         $versionNode.'#text' = $newVersionNumber;
+    }
+    else {
+        Write-Host "Skipping version update since appBuild and appRevision are not set ($appBuild, $appRevision)";
     }
 }
 
@@ -82,5 +86,5 @@ function Get-PowerPlatformSolutionFiles {
 }
 
 Write-Host "Updating Power Platform solution files";
-$solutionFiles = Get-PowerPlatformSolutionFiles -solutionFolder $solutionFolder;
+# When we use the solution folder we should only get 1 solution file - the script is just written so it can handle multiple solution files in the future
 Update-SolutionFiles -appBuild $appBuild -appRevision $appRevision -managed $managed -solutionFiles $solutionFiles;

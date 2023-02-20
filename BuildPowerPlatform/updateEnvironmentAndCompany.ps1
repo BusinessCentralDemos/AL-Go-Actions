@@ -57,7 +57,6 @@ function replaceOldSettings {
 }
 
 Write-Host "Updating Business Central environment and company settings";
-
 $currentSettings = getCurrentSettings -solutionFolder $SolutionFolder;
 if ($currentSettings.Count -eq 0) {
     Write-Warning "Could not find connections file";

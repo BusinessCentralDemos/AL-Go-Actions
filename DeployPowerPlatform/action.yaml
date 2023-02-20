@@ -89,8 +89,8 @@ runs:
         solutionFolder: .artifacts/tempPPSolution/source
         outputFolder: .artifacts/tempPPSolution
         outputFileName: ppsolution
-        companyId: ${{ env.companyId }}
-        environmentName: ${{ env.environmentName }}
+        companyId: ${{ env.bcCompanyId }}
+        environmentName: ${{ env.bcEnvironment }}
 
     - name: Publish solution to Power Platform (userName)
       if: ${{ env.userName != '' }}

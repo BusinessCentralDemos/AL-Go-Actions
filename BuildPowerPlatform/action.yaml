@@ -45,7 +45,6 @@ inputs:
     description: The app revision number
     default: '0'
     required: false
-
     
 runs:
   using: composite

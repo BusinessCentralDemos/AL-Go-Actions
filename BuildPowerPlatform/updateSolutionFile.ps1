@@ -21,7 +21,6 @@ function Update-VersionNode {
     )
 
     if ($appBuild -and $appRevision) {
-        Write-Host "Updating version";
         $versionNode = $xml.SelectSingleNode("//Version");
         $versionNodeText = $versionNode.'#text';
         

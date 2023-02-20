@@ -87,4 +87,5 @@ function Get-PowerPlatformSolutionFiles {
 
 Write-Host "Updating Power Platform solution files";
 # When we use the solution folder we should only get 1 solution file - the script is just written so it can handle multiple solution files in the future
+$solutionFiles = Get-PowerPlatformSolutionFiles -solutionFolder $solutionFolder;
 Update-SolutionFiles -appBuild $appBuild -appRevision $appRevision -managed $managed -solutionFiles $solutionFiles;

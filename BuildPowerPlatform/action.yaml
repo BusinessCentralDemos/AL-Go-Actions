@@ -60,7 +60,7 @@ runs:
       if: ${{ inputs.companyId != '' }}
       shell: ${{ inputs.shell }}
       run: |
-        ${{ github.action_path }}\updateEnvironmentAndCompany.ps1 -companyId ${{inputs.companyId}} -environmentName ${{inputs.environmentName}}
+        ${{ github.action_path }}\updateEnvironmentAndCompany.ps1 -companyId ${{inputs.companyId}} -environmentName ${{inputs.environmentName}} -solutionFolder ${{inputs.solutionFolder}}
     
     - name: Test Pack (Not real - just workaround for https://github.com/microsoft/powerplatform-vscode/issues/412)
       uses: microsoft/powerplatform-actions/pack-solution@v0

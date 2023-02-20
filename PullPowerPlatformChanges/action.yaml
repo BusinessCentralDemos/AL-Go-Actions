@@ -1,4 +1,4 @@
-name: PullPowerPlatformChanges
+name: Pull Power Platform Changes
 author: Andersg
 inputs:
   shell:

@@ -90,6 +90,7 @@ else {
 Add-Content -Path $env:GITHUB_OUTPUT -Value "authContext=$authContext"
 Write-Host "authContext=$authContext"
 Add-Content -Path $env:GITHUB_OUTPUT -Value "deployTo=$($deployToSettings | ConvertTo-Json -depth 99 -compress)"
+Write-Host "deployTo=$deployToSettings"
 Add-Content -Path $env:GITHUB_OUTPUT -Value "environmentName=$environmentName"
 Write-Host "environmentName=$([System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($environmentName)))"
 Write-Host "environmentName (as Base64)=$environmentName"

@@ -17,19 +17,41 @@ $ErrorActionPreference = "Stop"
 Set-StrictMode -Version 2.0
 $telemetryScope = $null
 $bcContainerHelperPath = $null
+Write-Host "Increment Version Number"
+
+function Update-PowerPlatformSolutionVersion {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$Version
+    )
+
+    $files = Get-ChildItem -Recurse -File
+    foreach ($file in $files) {
+        if ($file.Name -eq "solution.xml" -and $file.Directory.Name -eq "other") {
+            $xml = [xml](Get-Content $file.FullName)
+            $xml.SelectNodes("//Version")[0].InnerText = $Version
+            $xml.Save($file.FullName)
+        }
+    }
+}
 
 # IMPORTANT: No code that can fail should be outside the try/catch
 
 try {
     . (Join-Path -Path $PSScriptRoot -ChildPath "..\AL-Go-Helper.ps1" -Resolve)
+    
+    # Set up git branch and clone repository
     $branch = "$(if (!$directCommit) { [System.IO.Path]::GetRandomFileName() })"
     $serverUrl = CloneIntoNewFolder -actor $actor -token $token -branch $branch
     $repoBaseFolder = (Get-Location).path
+
+    # Set up container and telemetry helper
     $BcContainerHelperPath = DownloadAndImportBcContainerHelper -baseFolder $repoBaseFolder
 
     import-module (Join-Path -path $PSScriptRoot -ChildPath "..\TelemetryHelper.psm1" -Resolve)
     $telemetryScope = CreateScope -eventId 'DO0076' -parentTelemetryScopeJson $parentTelemetryScopeJson
     
+    # Calculate new version number
     $addToVersionNumber = "$versionnumber".StartsWith('+')
     if ($addToVersionNumber) {
         $versionnumber = $versionnumber.Substring(1)
@@ -41,6 +63,7 @@ try {
         throw "Version number ($versionnumber) is malformed. A version number must be structured as <Major>.<Minor> or +<Major>.<Minor>"
     }
 
+    # Find all AL projects
     if (!$project) { $project = '*' }
 
     if ($project -ne '.') {
@@ -58,6 +81,7 @@ try {
         $projects = @( '.' )
     }
 
+    # Update version number for all AL projects
     $projects | ForEach-Object {
         $project = $_
         try {
@@ -118,6 +142,11 @@ try {
             }
         }
     }
+
+    # Update version number for Power Platform solutions
+    Update-PowerPlatformSolutionVersion -Version $newVersion 
+
+    # Commit changes to branch
     if ($addToVersionNumber) {
         CommitFromNewFolder -serverUrl $serverUrl -commitMessage "Increment Version number by $($newVersion.Major).$($newVersion.Minor)" -branch $branch
     }

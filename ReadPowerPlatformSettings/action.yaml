@@ -24,9 +24,9 @@ runs:
     - name: run
       shell: ${{ inputs.shell }}
       env:
-        _deploySettings: ${{ inputs.deploySettings }}
-        _authSettings: ${{ inputs.authSettings }}
-      run: ${{ github.action_path }}/ParseDeploymentAndAuthSettings.ps1 -deploySettings $ENV:_deploySettings -authSettings $ENV:_authSettings
+        _deployToSettings: ${{ inputs.deploySettings }}
+        _authContext: ${{ inputs.authSettings }}
+      run: ${{ github.action_path }}/ParseDeploymentAndAuthSettings.ps1 -deployToSettings $ENV:_deployToSettings -authContext $ENV:_authContext
 
 branding:
   icon: terminal

@@ -45,7 +45,16 @@ inputs:
     description: The app revision number
     default: '0'
     required: false
-    
+
+env: 
+  _solutionFolder: ${{inputs.solutionFolder}}
+  _outputFolder: ${{inputs.outputFolder}}
+  _outputFileName: ${{inputs.outputFileName}}
+  _companyId: ${{inputs.companyId}}
+  _environmentName: ${{inputs.environmentName}}
+  _appBuild: ${{inputs.appBuild}}
+  _appRevision: ${{inputs.appRevision}}
+
 runs:
   using: composite
   steps:

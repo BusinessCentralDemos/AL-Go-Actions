@@ -9,12 +9,16 @@ inputs:
     description: Specifies the parent telemetry scope for the telemetry signal
     required: false
     default: '7b7d'
-  deploySettings: 
-    description: The deploy settings
+  envName: 
+    description: The environment name
     required: false
-    default: '{}'
-  authSettings: 
-    description: The auth settings
+    default: ''
+  environment: 
+    description: The environment name from the matrix?
+    required: false
+    default: ''
+  projects: 
+    description: The projects
     required: false
     default: '{}'
 
@@ -22,8 +26,12 @@ runs:
   using: composite
   steps:
     - name: run
+      env:
+        _envName: ${{ inputs.envName }}
+        _environment: ${{ inputs.environment }}
+        _projects: ${{ inputs.projects }}
       shell: ${{ inputs.shell }}
-      run: ${{ github.action_path }}/ParseDeploymentAndAuthSettings.ps1 -deployToSettings '${{ inputs.deploySettings }}' -authContext '${{ inputs.authSettings }}'
+      run: ${{ github.action_path }}/ParseAuthContext.ps1 -envName $ENV:_envName -environment $ENV:_environment -projects $ENV:_projects
 
 branding:
   icon: terminal

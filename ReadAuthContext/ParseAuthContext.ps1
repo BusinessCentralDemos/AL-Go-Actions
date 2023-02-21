@@ -1,6 +1,14 @@
+param(
+    [Parameter(Mandatory = $true)]
+    [string] $envName,
+    [Parameter(Mandatory = $true)]
+    [string] $environment,
+    [Parameter(Mandatory = $true)]
+    [string] $projects
+)
+
 $ErrorActionPreference = "STOP"
 Set-StrictMode -version 2.0
-$envName = '${{ steps.envName.outputs.envName }}'
 
 $deployToSettingStr = [System.Environment]::GetEnvironmentVariable("DeployTo$envName")
 if ($deployToSettingStr) {
@@ -40,12 +48,12 @@ else {
     }            
   }
   if (!($environmentName)) {
-    $environmentName = '${{ steps.envName.outputs.envName }}'
+    $environmentName = $envName;
   }
   $deployToSettings | Add-Member -MemberType NoteProperty -name 'environmentName' -value $environmentName
 }
 
-$environmentName = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(($environmentName + '${{ matrix.environment }}'.SubString($envName.Length)).ToUpperInvariant()))
+$environmentName = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(($environmentName + $environment.SubString($envName.Length)).ToUpperInvariant()))
 if (("$deployToSettings" -ne "") -and $deployToSettings.PSObject.Properties.name -eq "projects") {
   $projects = $deployToSettings.projects
 }
@@ -68,7 +76,7 @@ if ($projects -eq '' -or $projects -eq '*') {
   $deployPP = ("$powerPlatformSolutionFolder" -ne "")
 }
 else {
-  $buildProjects = '${{ needs.Initialization.outputs.projects }}' | ConvertFrom-Json
+  $buildProjects = $projects | ConvertFrom-Json
   $projects = ($projects.Split(',') | Where-Object { 
       $deployALProject = $buildProjects -contains $_
       if ($_ -eq $powerPlatformSolutionFolder) {

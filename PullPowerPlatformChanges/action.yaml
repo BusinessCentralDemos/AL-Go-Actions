@@ -114,7 +114,7 @@ runs:
           _token: ${{ inputs.token }}
           _parentTelemetryScopeJson: ${{ inputs.parentTelemetryScopeJson }}
           _solutionName: ${{ inputs.solutionName }}
-        run: ${{ github.action_path }}\GitCommitChanges.ps1 -Actor $ENV:_actor -Token $ENV:_token -ParentTelemetryScopeJson $ENV:_parentTelemetryScopeJson -PowerPlatformSolutionName $ENV:_solutionName -EnvironmentName ${{ env.environmentName }} -Location ${{ env.clonedRepoPath }} -ServerUrl ${{ env.serverUrl }} -GitHubBranch ${{ env.gitHubBranch }}
+        run: ${{ github.action_path }}\GitCommitChanges.ps1 -Actor $ENV:_actor -Token $ENV:_token -ParentTelemetryScopeJson $ENV:_parentTelemetryScopeJson -PowerPlatformSolutionName $ENV:_solutionName -EnvironmentName $ENV:environmentName -Location $ENV:clonedRepoPath -ServerUrl $ENV:serverUrl -GitHubBranch $ENV:gitHubBranch
 
 branding:
   icon: terminal

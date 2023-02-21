@@ -67,7 +67,7 @@ runs:
                 if($filePath.contains("-PowerPlatformSolution-")){
                     Write-Host "Power Platform solution file:"$filePath
                     Add-Content -path $env:GITHUB_ENV -value "powerPlatformSolutionPath=$filePath" 
-                    return;
+                    return
                 }
             }            
             Write-Warning "Not able to find Power Platform solution file in ${{inputs.artifactPath}}"

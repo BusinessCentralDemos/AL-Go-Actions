@@ -446,6 +446,7 @@ function GetReleases {
 
     Write-Host "Analyzing releases $api_url/repos/$repository/releases"
     $releases = @(InvokeWebRequest -Headers (GetHeader -token $token) -Uri "$api_url/repos/$repository/releases" | ConvertFrom-Json)
+    Write-Host "Found $($releases.Count) releases"
     if ($releases.Count -gt 1) {
         # Sort by SemVer tag
         try {

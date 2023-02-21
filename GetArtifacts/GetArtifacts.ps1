@@ -14,7 +14,7 @@ Set-StrictMode -Version 2.0
 $telemetryScope = $null
 $bcContainerHelperPath = $null
 
-Write-Host "Get $artifactVersion artifacts from $ENV:GITHUB_REPOSITORY"
+Write-Host "Get artifacts: '$artifactVersion' from $ENV:GITHUB_REPOSITORY"
 # IMPORTANT: No code that can fail should be outside the try/catch
 
 try {
@@ -41,6 +41,7 @@ try {
         elseif ($artifactVersion -eq "draft") {
             $release = $releases | Select-Object -First 1
         }
+        
         if (!($release)) {
             throw "Unable to locate $artifactVersion release"
         }

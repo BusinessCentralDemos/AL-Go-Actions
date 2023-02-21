@@ -87,14 +87,14 @@ else {
     }) -join ','
 }
 
-Add-Content -Path $env:GITHUB_OUTPUT -Value "authContext=$authContext"
+Add-Content -Path $env:GITHUB_ENV -Value "authContext=$authContext"
 Write-Host "authContext=$authContext"
-Add-Content -Path $env:GITHUB_OUTPUT -Value "deployTo=$($deployToSettings | ConvertTo-Json -depth 99 -compress)"
+Add-Content -Path $env:GITHUB_ENV -Value "deployTo=$($deployToSettings | ConvertTo-Json -depth 99 -compress)"
 Write-Host "deployTo=$deployToSettings"
-Add-Content -Path $env:GITHUB_OUTPUT -Value "environmentName=$environmentName"
+Add-Content -Path $env:GITHUB_ENV -Value "environmentName=$environmentName"
 Write-Host "environmentName=$([System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($environmentName)))"
 Write-Host "environmentName (as Base64)=$environmentName"
-Add-Content -Path $env:GITHUB_OUTPUT -Value "projects=$projects"
+Add-Content -Path $env:GITHUB_ENV -Value "projects=$projects"
 Write-Host "projects=$projects"
-Add-Content -Path $env:GITHUB_OUTPUT -Value "deployPP=$deployPP"
+Add-Content -Path $env:GITHUB_ENV -Value "deployPP=$deployPP"
 Write-Host "deployPP=$deployPP"

@@ -1,10 +1,10 @@
 param(
-    [Parameter(Mandatory = $true)]
-    [string] $envName,
-    [Parameter(Mandatory = $true)]
-    [string] $environment,
-    [Parameter(Mandatory = $true)]
-    [string] $projects
+  [Parameter(Mandatory = $true)]
+  [string] $envName,
+  [Parameter(Mandatory = $true)]
+  [string] $environment,
+  [Parameter(Mandatory = $false)]
+  [string] $projects
 )
 
 $ErrorActionPreference = "STOP"

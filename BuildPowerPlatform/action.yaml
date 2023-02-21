@@ -58,7 +58,7 @@ runs:
         _appBuild: ${{inputs.appBuild}}
         _appRevision: ${{inputs.appRevision}}
       run: |
-        ${{ github.action_path }}\updateSolutionFile.ps1 -appBuild ${{env._appBuild}} -appRevision ${{env._appRevision}} -solutionFolder ${{env._solutionFolder}}}
+        ${{ github.action_path }}\updateSolutionFile.ps1 -appBuild ${{env._appBuild}} -appRevision ${{env._appRevision}} -solutionFolder ${{env._solutionFolder}}
     
     - name: Update BC connection settings
       if: ${{ inputs.companyId != '' }}

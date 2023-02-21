@@ -23,7 +23,10 @@ runs:
   steps:
     - name: run
       shell: ${{ inputs.shell }}
-      run: ${{ github.action_path }}/ParseDeploymentAndAuthSettings.ps1 -deployToSettings '${{ inputs.deploySettings }}' -authContext '${{ inputs.authSettings }}'
+      env:
+        _deploySettings: ${{ inputs.deploySettings }}
+        _authSettings: ${{ inputs.authSettings }}
+      run: ${{ github.action_path }}/ParseDeploymentAndAuthSettings.ps1 -deplaySettings ${{env._deploySettings}} -authSettings ${{env._authSettings}}
 
 branding:
   icon: terminal

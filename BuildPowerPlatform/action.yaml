@@ -50,38 +50,25 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Set up env variables
-      shell: ${{ inputs.shell }}
-      env: 
-        _solutionFolder: ${{inputs.solutionFolder}}
-        _outputFolder: ${{inputs.outputFolder}}
-        _outputFileName: ${{inputs.outputFileName}}
-        _companyId: ${{inputs.companyId}}
-        _environmentName: ${{inputs.environmentName}}
-        _appBuild: ${{inputs.appBuild}}
-        _appRevision: ${{inputs.appRevision}}
-      run: |
-        Write-Host "##[group]Set up env variables"
-        Write-Host "solutionFolder: $_solutionFolder"
-        Write-Host "outputFolder: $_outputFolder"
-        Write-Host "outputFileName: $_outputFileName"
-        Write-Host "companyId: $_companyId"
-        Write-Host "environmentName: $_environmentName"
-        Write-Host "appBuild: $_appBuild"
-        Write-Host "appRevision: $_appRevision"
-        Write-Host "##[endgroup]"
-
     - name: Update solution settings
       if: ${{ inputs.appBuild != '' }}
       shell: ${{ inputs.shell }}
+      env: 
+        _solutionFolder: ${{inputs.solutionFolder}}
+        _appBuild: ${{inputs.appBuild}}
+        _appRevision: ${{inputs.appRevision}}
       run: |
-        ${{ github.action_path }}\updateSolutionFile.ps1 -appBuild ${{inputs.appBuild}} -appRevision ${{inputs.appRevision}} -solutionFolder ${{env._solutionFolder}}}
+        ${{ github.action_path }}\updateSolutionFile.ps1 -appBuild ${{env._appBuild}} -appRevision ${{env._appRevision}} -solutionFolder ${{env._solutionFolder}}}
     
     - name: Update BC connection settings
       if: ${{ inputs.companyId != '' }}
       shell: ${{ inputs.shell }}
+      env: 
+        _solutionFolder: ${{inputs.solutionFolder}}
+        _companyId: ${{inputs.companyId}}
+        _environmentName: ${{inputs.environmentName}}        
       run: |
-        ${{ github.action_path }}\updateEnvironmentAndCompany.ps1 -companyId ${{inputs.companyId}} -environmentName ${{inputs.environmentName}} -solutionFolder ${{inputs.solutionFolder}}
+        ${{ github.action_path }}\updateEnvironmentAndCompany.ps1 -companyId ${{env._companyId}} -environmentName ${{env._environmentName}} -solutionFolder ${{env._solutionFolder}}
     
     - name: Test Pack (Not real - just workaround for https://github.com/microsoft/powerplatform-vscode/issues/412)
       uses: microsoft/powerplatform-actions/pack-solution@v0

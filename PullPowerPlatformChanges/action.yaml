@@ -64,7 +64,12 @@ runs:
 
       - name: Set up new branch for changes
         shell: ${{ inputs.shell }}
-        run: ${{ github.action_path }}\GitCloneReponsitory.ps1 -Actor '${{ inputs.actor }}' -Token ${{ inputs.token }} -ParentTelemetryScopeJson ${{inputs.parentTelemetryScopeJson}} -DirectCommit '${{ inputs.directCommit }}'
+        env:
+          _actor: ${{ inputs.actor }}
+          _token: ${{ inputs.token }}
+          _parentTelemetryScopeJson: ${{ inputs.parentTelemetryScopeJson }}
+          _directCommit: ${{ inputs.directCommit }}
+        run: ${{ github.action_path }}\GitCloneReponsitory.ps1 -Actor ${{ env._actor }} -Token ${{ env._token }} -ParentTelemetryScopeJson ${{env._parentTelemetryScopeJson}} -DirectCommit ${{ env._directCommit }}
 
       - name: export-solution action (username)
         if: ${{ env.userName != '' }}
@@ -98,11 +103,18 @@ runs:
 
       - name: Remove zip file
         shell: ${{ inputs.shell }}
-        run: rm ${{env.clonedRepoPath}}/${{inputs.solutionName}}.zip
+        env:
+          _solutionName: ${{ inputs.solutionName }}
+        run: rm ${{env.clonedRepoPath}}/${{env._solutionName}}.zip
 
       - name: Commit to git repository
         shell: ${{ inputs.shell }}
-        run: ${{ github.action_path }}\GitCommitChanges.ps1 -Actor ${{ inputs.actor }} -Token ${{ inputs.token }} -ParentTelemetryScopeJson ${{ inputs.parentTelemetryScopeJson }} -EnvironmentName '${{ env.environmentName }}' -PowerPlatformSolutionName ${{inputs.solutionName}} -Location '${{ env.clonedRepoPath }}' -ServerUrl '${{ env.serverUrl }}' -GitHubBranch '${{ env.gitHubBranch }}'
+        env:
+          _actor: ${{ inputs.actor }}
+          _token: ${{ inputs.token }}
+          _parentTelemetryScopeJson: ${{ inputs.parentTelemetryScopeJson }}
+          _solutionName: ${{ inputs.solutionName }}
+        run: ${{ github.action_path }}\GitCommitChanges.ps1 -Actor ${{ env._actor }} -Token ${{ env._token }} -ParentTelemetryScopeJson ${{ env._parentTelemetryScopeJson }} -PowerPlatformSolutionName ${{env._solutionName}} -EnvironmentName ${{ env.environmentName }} -Location ${{ env.clonedRepoPath }} -ServerUrl ${{ env.serverUrl }} -GitHubBranch ${{ env.gitHubBranch }}
 
 branding:
   icon: terminal

@@ -146,4 +146,4 @@ function Update-PowerApps {
 
 Write-Host "Updating Business Central environment and company settings"
 Update-PowerApps -SolutionFolder $SolutionFolder -EnvironmentName $EnvironmentName -CompanyId $CompanyId
-Update-Flows -SolutionFolder $SolutionFolder -EnvironmentName $EnvironmentName -CompanyId $CompanyId
+#Update-Flows -SolutionFolder $SolutionFolder -EnvironmentName $EnvironmentName -CompanyId $CompanyId

@@ -63,6 +63,9 @@ try {
         throw "Version number ($versionnumber) is malformed. A version number must be structured as <Major>.<Minor> or +<Major>.<Minor>"
     }
 
+    # Update version number for all Power Platform solutions
+    Update-PowerPlatformSolutionVersion -Version $newVersion 
+
     # Find all AL projects
     if (!$project) { $project = '*' }
 
@@ -142,9 +145,6 @@ try {
             }
         }
     }
-
-    # Update version number for Power Platform solutions
-    Update-PowerPlatformSolutionVersion -Version $newVersion 
 
     # Commit changes to branch
     if ($addToVersionNumber) {

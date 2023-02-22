@@ -11,27 +11,27 @@ function getCurrentPowerAppSettings {
     )
 
     $connectionFiles = Get-ChildItem -Path "$solutionFolder/CanvasApps" -Recurse -File -Include "Connections.json"    
+    
     $currentSettingsList = @()
-
     foreach ($connectionFile in $connectionFiles) {
         $connectionsFilePath = $connectionFile.FullName
         $jsonFile = Get-Content $connectionsFilePath | ConvertFrom-Json
-        $ConnectorNodeNames = ($jsonFile | Get-Member -MemberType NoteProperty).Name               
-
+    
         # We don't know the name of the connector node, so we need to loop through all of them
+        $ConnectorNodeNames = ($jsonFile | Get-Member -MemberType NoteProperty).Name
+
         foreach ($connectorNodeName in $ConnectorNodeNames) {
             $connectorNode = $jsonFile.$connectorNodeName
+            # Find the Business Central connection node 
             if ($connectorNode.connectionRef.displayName -eq "Dynamics 365 Business Central") {
                 $currentEnvironmentAndCompany = ($connectorNode.datasets | Get-Member -MemberType NoteProperty).Name
 
                 if (!$currentsettingsList.Contains($currentEnvironmentAndCompany)) {
                     $currentSettingsList += $currentEnvironmentAndCompany
                 } 
-                break     
             }
         }
-    }
-    
+    }    
     return $currentSettingsList
 }
 
@@ -42,7 +42,7 @@ function replaceOldSettings {
         [Parameter(Position = 0, mandatory = $true)] [string] $newSetting
     )
 
-    $powerAppFiles = Get-ChildItem -Recurse -File $solutionFolder
+    $powerAppFiles = Get-ChildItem -Recurse -File "$solutionFolder/CanvasApps"
     foreach ($file in $powerAppFiles) {
         # only check json and xml files
         if (($file.Extension -eq ".json") -or ($file.Extension -eq ".xml")) {
@@ -102,7 +102,7 @@ function Update-FlowJson {
     # Read the JSON file
     $jsonObject = Get-Content $FilePath | ConvertFrom-Json
     
-    # Update triggers
+    # Update all flow triggers
     $triggersObject = $jsonObject.properties.definition.triggers
     $triggers = $triggersObject | Get-Member -MemberType Properties
     foreach ($trigger in $triggers) {
@@ -114,7 +114,7 @@ function Update-FlowJson {
         $parametersObject = Update-FlowSettingsParamterObject -parametersObject $parametersObject -CompanyId $CompanyId -EnvironmentName $EnvironmentName
     }
     
-    # Update actions
+    # Update all flow actions
     $actionsObject = $jsonObject.properties.definition.actions
     $actions = $actionsObject | Get-Member -MemberType Properties
     foreach ($action in $actions) {

@@ -56,7 +56,7 @@ function replaceOldSettings {
     }
 }
 
-function Update-FlowParameters {
+function Update-FlowSettingsParamterObject {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true)]
@@ -108,7 +108,7 @@ function Update-FlowJson {
     $triggers = $triggersObject | Get-Member -MemberType Properties
     foreach ($trigger in $triggers) {
         $parametersObject = $triggers.($trigger.Name).inputs.parameters
-        $parametersObject = Update-FlowParameters -parametersObject $parametersObject -CompanyId $CompanyId -EnvironmentName $EnvironmentName
+        $parametersObject = Update-FlowSettingsParamterObject -parametersObject $parametersObject -CompanyId $CompanyId -EnvironmentName $EnvironmentName
     }
     
     # Update actions
@@ -116,7 +116,7 @@ function Update-FlowJson {
     $actions = $actionsObject | Get-Member -MemberType Properties
     foreach ($action in $actions) {
         $parametersObject = $actions.($action.Name).inputs.parameters
-        $parametersObject = Update-FlowParameters -parametersObject $parametersObject -CompanyId $CompanyId -EnvironmentName $EnvironmentName
+        $parametersObject = Update-FlowSettingsParamterObject -parametersObject $parametersObject -CompanyId $CompanyId -EnvironmentName $EnvironmentName
     }
 
     # Save the updated JSON back to the file

@@ -66,28 +66,27 @@ function Update-FlowSettingsParamterObject {
         [Parameter(Mandatory = $true)]
         [string]$EnvironmentName
     )
-    # Check if parameters are for Business Central
-    if ((-not $parametersObject.company) -or (-not $parametersObject.bcEnvironment)) {
-        return $parametersObject
-    }       
+        # Check if paramers are for Business Central
+        if ((-not $parametersObject.company) -or (-not $parametersObject.bcEnvironment)) {
+            return $parametersObject
+        }       
         
-    # Check if parameters are already set to the correct values
-    if (($parametersObject.company -eq $CompanyId) -and ($parametersObject.bcEnvironment -eq $EnvironmentName)) {
-        Write-Host "No changes needed for: $FilePath"
-        return $parametersObject
-    }
+        # Check if parameters are already set to the correct values
+        if (($parametersObject.company -eq $CompanyId) -and ($parametersObject.bcEnvironment -eq $EnvironmentName)) {
+            Write-Host "No changes needed for: $FilePath"
+            return $parametersObject
+        }
 
-    # Check if parameters are set using a different approach (e.g. environment variables or passed in parameters)
-    if ($parametersObject.company -contains "@parameters('" -or $parametersObject.bcEnvironment -contains "@parameters('") {
-        Write-Host "No changes needed for: $FilePath"
-        Write-Host "Connection is set using a different approach (e.g. environment variables or passed in parameters)"
-        return $parametersObject
-    }
+        # Check if parameters are set using a different approach (e.g. environment variables or passed in parameters)
+        if ($parametersObject.company -contains "@parameters('" -or $parametersObject.bcEnvironment -contains "@parameters('") {
+            Write-Host "No changes needed for: $FilePath (parameters are set using a configurable approach)"
+            return $parametersObject
+        }
 
-    Write-Host "Updating: $FilePath with $CompanyId and $EnvironmentName"
-    $parametersObject.company = $CompanyId
-    $parametersObject.bcEnvironment = $EnvironmentName
-    return $parametersObject
+        Write-Host "Updating: $FilePath"
+        $parametersObject.company = $CompanyId
+        $parametersObject.bcEnvironment = $EnvironmentName
+        return $parametersObject
 }
 
 function Update-FlowJson {
@@ -107,24 +106,28 @@ function Update-FlowJson {
     $triggersObject = $jsonObject.properties.definition.triggers
     $triggers = $triggersObject | Get-Member -MemberType Properties
     foreach ($trigger in $triggers) {
-        $parametersObject = $triggers.($trigger.Name).inputs.parameters                
-        if ($parametersObject) {
-            $parametersObject = Update-FlowSettingsParamterObject -parametersObject $parametersObject -CompanyId $CompanyId -EnvironmentName $EnvironmentName
+        $parametersObject = $triggersObject.($trigger.Name).inputs.parameters        
+        
+        if (-not $parametersObject) {
+            continue
         }
+        $parametersObject = Update-FlowSettingsParamterObject -parametersObject $parametersObject -CompanyId $CompanyId -EnvironmentName $EnvironmentName
     }
     
     # Update actions
     $actionsObject = $jsonObject.properties.definition.actions
     $actions = $actionsObject | Get-Member -MemberType Properties
     foreach ($action in $actions) {
-        $parametersObject = $actions.($action.Name).inputs.parameters
-        if ($parametersObject) {
-            $parametersObject = Update-FlowSettingsParamterObject -parametersObject $parametersObject -CompanyId $CompanyId -EnvironmentName $EnvironmentName
+        $parametersObject = $actionsObject.($action.Name).inputs.parameters
+        
+        if (-not $parametersObject) {
+            continue
         }      
+        $parametersObject = Update-FlowSettingsParamterObject -parametersObject $parametersObject -CompanyId $CompanyId -EnvironmentName $EnvironmentName
     }
 
     # Save the updated JSON back to the file
-    $jsonObject | ConvertTo-Json -Compress -Depth 100 | Set-Content $FilePath
+    $jsonObject | ConvertTo-Json -Depth 100 | Set-Content $FilePath
 }
 
 function Update-Flows {
@@ -142,7 +145,6 @@ function Update-Flows {
     $flowFilePaths = Get-ChildItem -Path "$SolutionFolder/workflows" -Recurse -Filter *.json | Select-Object -ExpandProperty FullName
         
     foreach ($flowFilePath in $flowFilePaths) {
-        Write-Host "Updating: $flowFilePath"
         Update-FlowJson -FilePath $flowFilePath -CompanyId $CompanyId -EnvironmentName $EnvironmentName
     }        
 }

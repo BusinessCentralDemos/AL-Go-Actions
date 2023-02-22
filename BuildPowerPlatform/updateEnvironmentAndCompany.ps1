@@ -10,7 +10,7 @@ function getCurrentPowerAppSettings {
         [Parameter(Position = 0, mandatory = $true)] [string] $solutionFolder
     )
 
-    $connectionFiles = Get-ChildItem -Path $solutionFolder -Recurse -File -Include "Connections.json"    
+    $connectionFiles = Get-ChildItem -Path "$solutionFolder/CanvasApps" -Recurse -File -Include "Connections.json"    
     $currentSettingsList = @()
 
     foreach ($connectionFile in $connectionFiles) {

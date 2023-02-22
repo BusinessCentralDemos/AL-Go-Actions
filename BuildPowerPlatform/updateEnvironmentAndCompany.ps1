@@ -68,26 +68,36 @@ function Update-FlowJson {
     )
     # Read the JSON file
     $jsonObject = Get-Content $FilePath | ConvertFrom-Json
+    
+    # Update triggers
+    $triggers = $jsonObject.properties.definition.triggers
+    
+    
+    # Update actions
+    $actions = $jsonObject.properties.definition.actions
+    $actionProperties = $actions | Get-Member -MemberType Properties
+    foreach ($action in $actionProperties) {
+        $parametersObject = $actions.($action.Name).inputs.parameters
 
-    # Look for bcEnvironment and company properties and update them
-    foreach ($action in $jsonObject.properties.definition.actions) {
-        $parametersObject = $action.inputs.parameters;
-        if ((-not $parameterObject) -or (-not $parameterObject.company) -or (-not $parameterObject.bcEnvironment)) {
-            continue;
+        # Check if paramers are for Business Central
+        if ((-not $parametersObject) -or (-not $parametersObject.company) -or (-not $parametersObject.bcEnvironment)) {
+            continue
         }       
 
+        # Check if parameters are already set to the correct values
         if (($parametersObject.company -eq $CompanyId) -and ($parametersObject.bcEnvironment -eq $EnvironmentName)) {
             Write-Host "No changes needed for: $FilePath"
+            continue
         }
-        else {
-            Write-Host "Updating: $FilePath with $CompanyId and $EnvironmentName"
-            $parametersObject.company = $CompanyId;
-            $parametersObject.bcEnvironment = $EnvironmentName;
-        }                
+
+        # TODO: Check if the parameters are set using a different approach (e.g. environment variables or passed in parameters)        
+        Write-Host "Updating: $FilePath with $CompanyId and $EnvironmentName"
+        $parametersObject.company = $CompanyId
+        $parametersObject.bcEnvironment = $EnvironmentName        
     } 
 
     # Save the updated JSON back to the file
-    $jsonObject | ConvertTo-Json | Set-Content $FilePath
+    $jsonObject | ConvertTo-Json -Compress -Depth 100 | Set-Content $FilePath
 }
 
 function Update-Flows {

@@ -30,6 +30,11 @@ function Update-PowerPlatformSolutionVersion {
     )
     
     $files = Get-ChildItem -Recurse -File
+    if ($files.Count -eq 0) {
+        Write-Host "Power Platform solution not found"
+        return $false
+    }
+
     foreach ($file in $files) {
         if ($file.Name -eq "solution.xml" -and $file.Directory.Name -eq "other") {
             $xml = [xml](Get-Content $file.FullName)
@@ -53,6 +58,7 @@ function Update-PowerPlatformSolutionVersion {
             $xml.Save($file.FullName)
         }
     }
+    return $true
 }
 
 function Update-ALProjects {
@@ -64,24 +70,28 @@ function Update-ALProjects {
         [Parameter(Mandatory = $false)]
         [System.Version]$newVersion,
         [Parameter(Mandatory = $true)]
-        [switch]$addToVersionNumber,
-        # NOTE: ALGoSettingsFile is not set
-        [Parameter(Mandatory = $false)]
-        [string]$ALGoSettingsFile
+        [switch]$addToVersionNumber        
     )
+
+    # TODO: This might be wrong - The value did not appear to be a set in the original version
+    $ALGoSettingsFile = ".AL-Go/settings.json";
 
     # Find all AL projects
     if (!$project) { $project = '*' }
 
     if ($project -ne '.') {
         $projects = @(Get-ChildItem -Path $repoBaseFolder -Directory -Recurse -Depth 2 | Where-Object { Test-Path (Join-Path $_.FullName ".AL-Go/settings.json") -PathType Leaf } | ForEach-Object { $_.FullName.Substring($repoBaseFolder.length + 1) } | Where-Object { $_ -like $project })
-        if ($projects.Count -eq 0) {
+        if ($projects.Count -eq 1) {
             if ($project -eq '*') {
                 $projects = @( '.' )
             }
             else {
                 throw "Project folder $project not found"
             }
+        }
+        elseif ($projects.Count -eq 0) {
+            Write-Host "No AL projects found"
+            return $false;
         }
     }
     else {
@@ -150,6 +160,8 @@ function Update-ALProjects {
             }
         }
     }
+    # Return true to indicate that we have updated the version number
+    return $true
 }
 
 
@@ -181,10 +193,14 @@ try {
     }
 
     # Update version number for all Power Platform solutions
-    Update-PowerPlatformSolutionVersion -newVersion $newVersion -versionInput $versionnumber -addToVersionNumber $addToVersionNumber
+    $hasUpdatedPPVerion = Update-PowerPlatformSolutionVersion -newVersion $newVersion -versionInput $versionnumber -addToVersionNumber $addToVersionNumber
 
     # Update version number for all AL projects
-    Update-ALProjects -repoBaseFolder $repoBaseFolder -newVersion $newVersion -addToVersionNumber $addToVersionNumber -project $project
+    $hasUpdateAlProjects = Update-ALProjects -repoBaseFolder $repoBaseFolder -newVersion $newVersion -addToVersionNumber $addToVersionNumber -project $project
+
+    if (!$hasUpdatedPPVerion -and !$hasUpdateAlProjects) {
+        throw "No Power Platform solutions or AL projects found in repository."
+    }   
 
     # Commit changes to branch
     if ($addToVersionNumber) {

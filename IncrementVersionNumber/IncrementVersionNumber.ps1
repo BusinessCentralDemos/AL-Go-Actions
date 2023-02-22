@@ -29,6 +29,7 @@ function Update-PowerPlatformSolutionVersion {
         [bool]$addToVersionNumber
     )
     
+    write-host "Updating Power Platform solution version"
     $files = Get-ChildItem -Recurse -File
     if ($files.Count -eq 0) {
         Write-Host "Power Platform solution not found"

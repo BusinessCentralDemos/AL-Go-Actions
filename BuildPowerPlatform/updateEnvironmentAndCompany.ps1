@@ -111,7 +111,7 @@ function Update-Flows {
         [string]$CompanyId
     )
 
-    Write-Host "Updating Flows BC settings"
+    Write-Host "Updating Flow settings"
     $flowFilePaths = Get-ChildItem -Path "$SolutionFolder/workflows" -Recurse -Filter *.json | Select-Object -ExpandProperty FullName
         
     foreach ($flowFilePath in $flowFilePaths) {

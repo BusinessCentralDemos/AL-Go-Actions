@@ -42,7 +42,7 @@ function replaceOldSettings {
         [Parameter(Position = 0, mandatory = $true)] [string] $newSetting
     )
 
-    $powerAppFiles = Get-ChildItem -Recurse -File "$solutionFolder/CanvasApps"
+    $powerAppFiles = Get-ChildItem -Recurse -File $solutionFolder
     foreach ($file in $powerAppFiles) {
         # only check json and xml files
         if (($file.Extension -eq ".json") -or ($file.Extension -eq ".xml")) {

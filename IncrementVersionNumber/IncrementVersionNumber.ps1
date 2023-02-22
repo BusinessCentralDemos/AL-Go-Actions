@@ -27,6 +27,7 @@ function Update-PowerPlatformSolutionVersion {
 
     $files = Get-ChildItem -Recurse -File
     foreach ($file in $files) {
+        Write-Host "Updating $($file.FullName) with version $Version"
         if ($file.Name -eq "solution.xml" -and $file.Directory.Name -eq "other") {
             $xml = [xml](Get-Content $file.FullName)
             $xml.SelectNodes("//Version")[0].InnerText = $Version

@@ -66,28 +66,28 @@ function Update-FlowSettingsParamterObject {
         [Parameter(Mandatory = $true)]
         [string]$EnvironmentName
     )
-        # Check if paramers are for Business Central
-        if ((-not $parametersObject) -or (-not $parametersObject.company) -or (-not $parametersObject.bcEnvironment)) {
-            return $parametersObject
-        }       
-        
-        # Check if parameters are already set to the correct values
-        if (($parametersObject.company -eq $CompanyId) -and ($parametersObject.bcEnvironment -eq $EnvironmentName)) {
-            Write-Host "No changes needed for: $FilePath"
-            return $parametersObject
-        }
-
-        # Check if parameters are set using a different approach (e.g. environment variables or passed in parameters)
-        if ($parametersObject.company -contains "@parameters('" -or $parametersObject.bcEnvironment -contains "@parameters('") {
-            Write-Host "No changes needed for: $FilePath"
-            Write-Host "Connection is set using a different approach (e.g. environment variables or passed in parameters)"
-            return $parametersObject
-        }
-
-        Write-Host "Updating: $FilePath with $CompanyId and $EnvironmentName"
-        $parametersObject.company = $CompanyId
-        $parametersObject.bcEnvironment = $EnvironmentName
+    # Check if parameters are for Business Central
+    if ((-not $parametersObject.company) -or (-not $parametersObject.bcEnvironment)) {
         return $parametersObject
+    }       
+        
+    # Check if parameters are already set to the correct values
+    if (($parametersObject.company -eq $CompanyId) -and ($parametersObject.bcEnvironment -eq $EnvironmentName)) {
+        Write-Host "No changes needed for: $FilePath"
+        return $parametersObject
+    }
+
+    # Check if parameters are set using a different approach (e.g. environment variables or passed in parameters)
+    if ($parametersObject.company -contains "@parameters('" -or $parametersObject.bcEnvironment -contains "@parameters('") {
+        Write-Host "No changes needed for: $FilePath"
+        Write-Host "Connection is set using a different approach (e.g. environment variables or passed in parameters)"
+        return $parametersObject
+    }
+
+    Write-Host "Updating: $FilePath with $CompanyId and $EnvironmentName"
+    $parametersObject.company = $CompanyId
+    $parametersObject.bcEnvironment = $EnvironmentName
+    return $parametersObject
 }
 
 function Update-FlowJson {
@@ -107,8 +107,10 @@ function Update-FlowJson {
     $triggersObject = $jsonObject.properties.definition.triggers
     $triggers = $triggersObject | Get-Member -MemberType Properties
     foreach ($trigger in $triggers) {
-        $parametersObject = $triggers.($trigger.Name).inputs.parameters
-        $parametersObject = Update-FlowSettingsParamterObject -parametersObject $parametersObject -CompanyId $CompanyId -EnvironmentName $EnvironmentName
+        $parametersObject = $triggers.($trigger.Name).inputs.parameters                
+        if ($parametersObject) {
+            $parametersObject = Update-FlowSettingsParamterObject -parametersObject $parametersObject -CompanyId $CompanyId -EnvironmentName $EnvironmentName
+        }
     }
     
     # Update actions
@@ -116,7 +118,9 @@ function Update-FlowJson {
     $actions = $actionsObject | Get-Member -MemberType Properties
     foreach ($action in $actions) {
         $parametersObject = $actions.($action.Name).inputs.parameters
-        $parametersObject = Update-FlowSettingsParamterObject -parametersObject $parametersObject -CompanyId $CompanyId -EnvironmentName $EnvironmentName
+        if ($parametersObject) {
+            $parametersObject = Update-FlowSettingsParamterObject -parametersObject $parametersObject -CompanyId $CompanyId -EnvironmentName $EnvironmentName
+        }      
     }
 
     # Save the updated JSON back to the file

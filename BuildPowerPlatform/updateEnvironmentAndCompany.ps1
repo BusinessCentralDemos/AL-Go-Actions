@@ -169,9 +169,7 @@ function Update-PowerApps {
         throw "Could not find connections file"
     }
         
-    $newSettings = "$EnvironmentName,$CompanyId"
-    Write-Host "New settings: "$newSettings
-        
+    $newSettings = "$EnvironmentName,$CompanyId"    
     foreach ($currentSetting in $currentPowerAppSettings) {
         if ($currentSetting -eq $newSettings) {
             Write-Host "No changes needed for: "$currentSetting
@@ -184,5 +182,6 @@ function Update-PowerApps {
 }
 
 Write-Host "Updating Business Central environment and company settings"
+Write-Host "New settings: $EnvironmentName, $CompanyId"
 Update-PowerApps -SolutionFolder $SolutionFolder -EnvironmentName $EnvironmentName -CompanyId $CompanyId
 Update-Flows -SolutionFolder $SolutionFolder -EnvironmentName $EnvironmentName -CompanyId $CompanyId

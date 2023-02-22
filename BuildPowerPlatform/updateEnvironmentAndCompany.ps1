@@ -56,6 +56,40 @@ function replaceOldSettings {
     }
 }
 
+function Update-FlowParameters {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [System.Object]$parametersObject,
+        [Parameter(Mandatory = $true)]
+        [string]$CompanyId,
+        [Parameter(Mandatory = $true)]
+        [string]$EnvironmentName
+    )
+        # Check if paramers are for Business Central
+        if ((-not $parametersObject) -or (-not $parametersObject.company) -or (-not $parametersObject.bcEnvironment)) {
+            return $parametersObject
+        }       
+        
+        # Check if parameters are already set to the correct values
+        if (($parametersObject.company -eq $CompanyId) -and ($parametersObject.bcEnvironment -eq $EnvironmentName)) {
+            Write-Host "No changes needed for: $FilePath"
+            return $parametersObject
+        }
+
+        # Check if parameters are set using a different approach (e.g. environment variables or passed in parameters)
+        if ($parametersObject.company -contains "@parameters('" -or $parametersObject.bcEnvironment -contains "@parameters('") {
+            Write-Host "No changes needed for: $FilePath"
+            Write-Host "Connection is set using a different approach (e.g. environment variables or passed in parameters)"
+            return $parametersObject
+        }
+
+        Write-Host "Updating: $FilePath with $CompanyId and $EnvironmentName"
+        $parametersObject.company = $CompanyId
+        $parametersObject.bcEnvironment = $EnvironmentName
+        return $parametersObject
+}
+
 function Update-FlowJson {
     [CmdletBinding()]
     param(
@@ -70,37 +104,20 @@ function Update-FlowJson {
     $jsonObject = Get-Content $FilePath | ConvertFrom-Json
     
     # Update triggers
-    $triggers = $jsonObject.properties.definition.triggers
-    
+    $triggersObject = $jsonObject.properties.definition.triggers
+    $triggers = $triggersObject | Get-Member -MemberType Properties
+    foreach ($trigger in $triggers) {
+        $parametersObject = $triggers.($trigger.Name).inputs.parameters
+        $parametersObject = Update-FlowParameters -parametersObject $parametersObject -CompanyId $CompanyId -EnvironmentName $EnvironmentName
+    }
     
     # Update actions
-    $actions = $jsonObject.properties.definition.actions
-    $actionProperties = $actions | Get-Member -MemberType Properties
-    foreach ($action in $actionProperties) {
+    $actionsObject = $jsonObject.properties.definition.actions
+    $actions = $actionsObject | Get-Member -MemberType Properties
+    foreach ($action in $actions) {
         $parametersObject = $actions.($action.Name).inputs.parameters
-
-        # Check if paramers are for Business Central
-        if ((-not $parametersObject) -or (-not $parametersObject.company) -or (-not $parametersObject.bcEnvironment)) {
-            continue
-        }       
-
-        # Check if parameters are already set to the correct values
-        if (($parametersObject.company -eq $CompanyId) -and ($parametersObject.bcEnvironment -eq $EnvironmentName)) {
-            Write-Host "No changes needed for: $FilePath"
-            continue
-        }
-
-        # Check if parameters are set using a different approach (e.g. environment variables or passed in parameters)
-        if ($parametersObject.company -contains "@parameters('" -or $parametersObject.bcEnvironment -contains "@parameters('") {
-            Write-Host "No changes needed for: $FilePath"
-            Write-Host "Connection is set using a different approach (e.g. environment variables or passed in parameters)"
-            continue
-        }
-
-        Write-Host "Updating: $FilePath with $CompanyId and $EnvironmentName"
-        $parametersObject.company = $CompanyId
-        $parametersObject.bcEnvironment = $EnvironmentName        
-    } 
+        $parametersObject = Update-FlowParameters -parametersObject $parametersObject -CompanyId $CompanyId -EnvironmentName $EnvironmentName
+    }
 
     # Save the updated JSON back to the file
     $jsonObject | ConvertTo-Json -Compress -Depth 100 | Set-Content $FilePath

@@ -90,7 +90,13 @@ function Update-FlowJson {
             continue
         }
 
-        # TODO: Check if the parameters are set using a different approach (e.g. environment variables or passed in parameters)        
+        # Check if parameters are set using a different approach (e.g. environment variables or passed in parameters)
+        if ($parametersObject.company -contains "@parameters('" -or $parametersObject.bcEnvironment -contains "@parameters('") {
+            Write-Host "No changes needed for: $FilePath"
+            Write-Host "Connection is set using a different approach (e.g. environment variables or passed in parameters)"
+            continue
+        }
+
         Write-Host "Updating: $FilePath with $CompanyId and $EnvironmentName"
         $parametersObject.company = $CompanyId
         $parametersObject.bcEnvironment = $EnvironmentName        

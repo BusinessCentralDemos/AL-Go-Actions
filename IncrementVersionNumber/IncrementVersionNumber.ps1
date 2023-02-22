@@ -21,16 +21,35 @@ Write-Host "Increment Version Number"
 
 function Update-PowerPlatformSolutionVersion {
     param(
+        [Parameter(Mandatory=$false)]
+        [string]$newVersion,
         [Parameter(Mandatory=$true)]
-        [string]$Version
+        [string]$versionInput,
+        [Parameter(Mandatory=$true)]
+        [bool]$addToVersionNumber
     )
-
+    
     $files = Get-ChildItem -Recurse -File
     foreach ($file in $files) {
-        Write-Host "Updating $($file.FullName) with version $Version"
         if ($file.Name -eq "solution.xml" -and $file.Directory.Name -eq "other") {
             $xml = [xml](Get-Content $file.FullName)
-            $xml.SelectNodes("//Version")[0].InnerText = $Version
+            
+            if ($addToVersionNumber) {
+                # Find version increments
+                $versionInputParts = $versionInput.Split(".")
+                $majorIncrement = $versionInputParts[0]
+                $minorIncrement = $versionInputParts[1]
+                
+                # Increment version
+                $versionParts = $xml.SelectNodes("//Version")[0].InnerText.Split(".")
+                $versionParts[0] = [int]$versionParts[0] + [int]$majorIncrement
+                $versionParts[1] = [int]$versionParts[1] + [int]$minorIncrement
+                
+                $newVersion = [string]::Join(".", $versionParts)
+            }
+            
+            Write-Host "Updating $($file.FullName) with new version $newVersion"
+            $xml.SelectNodes("//Version")[0].InnerText = $newVersion    
             $xml.Save($file.FullName)
         }
     }

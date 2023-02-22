@@ -84,7 +84,7 @@ try {
     }
 
     # Update version number for all Power Platform solutions
-    Update-PowerPlatformSolutionVersion -Version $newVersion 
+    Update-PowerPlatformSolutionVersion -newVersion $newVersion -versionInput $versionnumber -addToVersionNumber $addToVersionNumber
 
     # Find all AL projects
     if (!$project) { $project = '*' }

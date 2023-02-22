@@ -58,6 +58,7 @@ function Update-PowerPlatformSolutionVersion {
             $xml.Save($file.FullName)
         }
     }
+
     return $true
 }
 
@@ -70,7 +71,7 @@ function Update-ALProjects {
         [Parameter(Mandatory = $false)]
         [System.Version]$newVersion,
         [Parameter(Mandatory = $true)]
-        [switch]$addToVersionNumber        
+        [bool]$addToVersionNumber        
     )
 
     # TODO: This might be wrong - The value did not appear to be a set in the original version

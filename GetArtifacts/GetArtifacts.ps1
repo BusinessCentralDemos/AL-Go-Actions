@@ -84,16 +84,16 @@ try {
     write-host "unzipping artifacts"
     # Get the full path of all ZIP files in the artifacts folder
     $downloadedArtifacts = (Get-ChildItem -Path $artifactsFolder -Filter "*.zip").FullName
-
-    foreach ($artifact in $downloadedArtifacts) {
-        $artifactName = [System.IO.Path]::GetFileNameWithoutExtension($artifact)
+    foreach ($downloadedArtifact in $downloadedArtifacts) {
+        Write-Host "Unzipping $downloadedArtifact"
+        $downloadedArtifactName = [System.IO.Path]::GetFileNameWithoutExtension($downloadedArtifact)
 
         # Create a folder with the same name as the artifact
-        $artifactFolder = Join-Path -Path $artifactsFolder -ChildPath $artifactName
-        New-Item -ItemType Directory -Path $artifactFolder -Force | Out-Null
+        $downloadedArtifactFolder = Join-Path -Path $artifactsFolder -ChildPath $downloadedArtifactName
+        New-Item -ItemType Directory -Path $downloadedArtifactFolder -Force | Out-Null
 
-        Expand-Archive -Path $artifact -DestinationPath $artifactFolder
-        Remove-Item -Path $artifact -Force
+        Expand-Archive -Path $downloadedArtifact -DestinationPath $downloadedArtifactFolder
+        Remove-Item -Path $downloadedArtifact -Force
     }
 
 }

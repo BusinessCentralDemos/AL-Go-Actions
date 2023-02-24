@@ -35,7 +35,6 @@ try {
         Write-Host "Getting $artifactVersion release artifacts"
 
         $releases = GetReleases -token $token -api_url $ENV:GITHUB_API_URL -repository $ENV:GITHUB_REPOSITORY
-
         if ($artifactVersion -eq "current") {
             $release = $releases | Where-Object { -not ($_.prerelease -or $_.draft) } | Select-Object -First 1
         }
@@ -61,7 +60,7 @@ try {
         }
     }
     else {
-        write-host "Getting artifacts for version $artifactVersion"
+        write-host "Getting artifacts for version: $artifactVersion"
         New-Item $artifactsFolder -ItemType Directory | Out-Null
         $allArtifacts = @(GetArtifacts -token $token -api_url $ENV:GITHUB_API_URL -repository $ENV:GITHUB_REPOSITORY -mask "Apps" -projects $projects -Version $artifactVersion -branch "main")
         $allArtifacts += @(GetArtifacts -token $token -api_url $ENV:GITHUB_API_URL -repository $ENV:GITHUB_REPOSITORY -mask "Dependencies" -projects $projects -Version $artifactVersion -branch "main")
@@ -76,13 +75,12 @@ try {
             }
         }
         else {
-            throw "Could not find any Apps artifacts for projects $projects, version $artifacts"
+            throw "Could not find any Apps artifacts for projects $projects"
         }
     }
 
     Write-Host "Arifacts downloaded to $artifactsFolder"
-    write-host "unzipping artifacts"
-    # Get the full path of all ZIP files in the artifacts folder
+    write-host "Unzip downloaded artifacts"
     $downloadedArtifacts = (Get-ChildItem -Path $artifactsFolder -Filter "*.zip").FullName
     foreach ($downloadedArtifact in $downloadedArtifacts) {
         Write-Host "Unzipping $downloadedArtifact"

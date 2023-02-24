@@ -5,16 +5,71 @@ param(
     [Parameter(Position = 2, mandatory = $true)] [string] $SolutionFolder
 )
 
-function getCurrentPowerAppSettings {
+
+function Update-PowerAppSettings {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$SolutionFolder,
+        
+        [Parameter(Mandatory = $true)]
+        [string]$EnvironmentName,
+        
+        [Parameter(Mandatory = $true)]
+        [string]$CompanyId
+    )
+
+    # There are multiple files that contain the BC connection info for PowerApps with different structures
+    # So instead of parsing all of them, we simple find the current connection strings and run a replace operation.
+    # Note: The connection string has a format of: "EnvironmentName,CompanyId" where companyId is a guid. So the 
+    #       replace operation should be safe to run a all json and XML files.
+    Write-Host "Updating PowerApp settings"        
+    $currentPowerAppSettings = Get-CurrentPowerAppSettings -solutionFolder $SolutionFolder
+    if ($currentPowerAppSettings.Count -eq 0) {
+        Write-Warning "Could not find PowerApps connections file"
+        throw "Could not find PowerApps connections file"
+    }
+        
+    $newSettings = "$EnvironmentName,$CompanyId"    
+    foreach ($currentSetting in $currentPowerAppSettings) {
+        if ($currentSetting -eq $newSettings) {
+            Write-Host "No changes needed for: "$currentSetting
+            continue
+        }
+        
+        Update-PowerAppFiles -oldSetting $currentSetting -newSetting $newSettings -solutionFolder $SolutionFolder
+    }
+}
+
+function Update-PowerAppFiles {
+    param(
+        [Parameter(Position = 0, mandatory = $true)] [string] $solutionFolder,
+        [Parameter(Position = 0, mandatory = $true)] [string] $oldSetting,
+        [Parameter(Position = 0, mandatory = $true)] [string] $newSetting
+    )
+
+    $powerAppFiles = Get-ChildItem -Recurse -File "$solutionFolder/CanvasApps"
+    foreach ($file in $powerAppFiles) {
+        # only check json and xml files
+        if (($file.Extension -eq ".json") -or ($file.Extension -eq ".xml")) {
+            
+            $fileContent = Get-Content $file.FullName
+            if (Select-String -Pattern $oldSetting -InputObject $fileContent) {
+                Set-Content -Path $file.FullName -Value $fileContent.Replace($oldSetting, $newSetting)
+                Write-Host "Updated: $file.FullName"
+            }
+        }
+    }
+}
+
+function Get-CurrentPowerAppSettings {
     param (
         [Parameter(Position = 0, mandatory = $true)] [string] $solutionFolder
     )
 
-    $connectionFiles = Get-ChildItem -Path $solutionFolder -Recurse -File -Include "Connections.json"    
-    
+    $connectionsFilePaths = Get-ChildItem -Path "$solutionFolder/CanvasApps" -Recurse -File -Include "Connections.json" | Select-Object -ExpandProperty FullName
     $currentSettingsList = @()
-    foreach ($connectionFile in $connectionFiles) {
-        $connectionsFilePath = $connectionFile.FullName
+    foreach ($connectionsFilePath in $connectionsFilePaths) {
         $jsonFile = Get-Content $connectionsFilePath | ConvertFrom-Json
     
         # We don't know the name of the connector node, so we need to loop through all of them
@@ -35,61 +90,26 @@ function getCurrentPowerAppSettings {
     return $currentSettingsList
 }
 
-function replaceOldSettings {
-    param(
-        [Parameter(Position = 0, mandatory = $true)] [string] $solutionFolder,
-        [Parameter(Position = 0, mandatory = $true)] [string] $oldSetting,
-        [Parameter(Position = 0, mandatory = $true)] [string] $newSetting
-    )
-
-    $powerAppFiles = Get-ChildItem -Recurse -File $solutionFolder
-    foreach ($file in $powerAppFiles) {
-        # only check json and xml files
-        if (($file.Extension -eq ".json") -or ($file.Extension -eq ".xml")) {
-            
-            $fileContent = Get-Content $file.FullName
-            if (Select-String -Pattern $oldSetting -InputObject $fileContent) {
-                Set-Content -Path $file.FullName -Value $fileContent.Replace($oldSetting, $newSetting)
-                Write-Host $file.FullName" <-- updated "
-            }
-        }
-    }
-}
-
-function Update-FlowSettingsParamterObject {
+function Update-FlowSettings {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true)]
-        [System.Object]$parametersObject,
+        [string]$SolutionFolder,        
         [Parameter(Mandatory = $true)]
-        [string]$CompanyId,
+        [string]$EnvironmentName,        
         [Parameter(Mandatory = $true)]
-        [string]$EnvironmentName
+        [string]$CompanyId
     )
-        # Check if paramers are for Business Central
-        if ((-not $parametersObject.company) -or (-not $parametersObject.bcEnvironment)) {
-            return $parametersObject
-        }       
+
+    Write-Host "Updating Flow settings"
+    $flowFilePaths = Get-ChildItem -Path "$SolutionFolder/workflows" -Recurse -Filter *.json | Select-Object -ExpandProperty FullName
         
-        # Check if parameters are already set to the correct values
-        if (($parametersObject.company -eq $CompanyId) -and ($parametersObject.bcEnvironment -eq $EnvironmentName)) {
-            Write-Host "No changes needed for: $FilePath"
-            return $parametersObject
-        }
-
-        # Check if parameters are set using a different approach (e.g. environment variables or passed in parameters)
-        if ($parametersObject.company -contains "@parameters('" -or $parametersObject.bcEnvironment -contains "@parameters('") {
-            Write-Host "No changes needed for: $FilePath (parameters are set using a configurable approach)"
-            return $parametersObject
-        }
-
-        Write-Host "Updating: $FilePath"
-        $parametersObject.company = $CompanyId
-        $parametersObject.bcEnvironment = $EnvironmentName
-        return $parametersObject
+    foreach ($flowFilePath in $flowFilePaths) {
+        Update-FlowFile -FilePath $flowFilePath -CompanyId $CompanyId -EnvironmentName $EnvironmentName
+    }        
 }
 
-function Update-FlowJson {
+function Update-FlowFile {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true)]
@@ -111,7 +131,7 @@ function Update-FlowJson {
         if (-not $parametersObject) {
             continue
         }
-        $parametersObject = Update-FlowSettingsParamterObject -parametersObject $parametersObject -CompanyId $CompanyId -EnvironmentName $EnvironmentName
+        $parametersObject = Update-ParameterObject -parametersObject $parametersObject -CompanyId $CompanyId -EnvironmentName $EnvironmentName
     }
     
     # Update all flow actions
@@ -123,65 +143,47 @@ function Update-FlowJson {
         if (-not $parametersObject) {
             continue
         }      
-        $parametersObject = Update-FlowSettingsParamterObject -parametersObject $parametersObject -CompanyId $CompanyId -EnvironmentName $EnvironmentName
+        $parametersObject = Update-ParameterObject -parametersObject $parametersObject -CompanyId $CompanyId -EnvironmentName $EnvironmentName
     }
 
     # Save the updated JSON back to the file
     $jsonObject | ConvertTo-Json -Depth 100 | Set-Content $FilePath
 }
 
-function Update-Flows {
+function Update-ParameterObject {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true)]
-        [string]$SolutionFolder,        
+        [System.Object]$parametersObject,
         [Parameter(Mandatory = $true)]
-        [string]$EnvironmentName,        
+        [string]$CompanyId,
         [Parameter(Mandatory = $true)]
-        [string]$CompanyId
+        [string]$EnvironmentName
     )
-
-    Write-Host "Updating Flow settings"
-    $flowFilePaths = Get-ChildItem -Path "$SolutionFolder/workflows" -Recurse -Filter *.json | Select-Object -ExpandProperty FullName
+    # Check if paramers are for Business Central
+    if ((-not $parametersObject.company) -or (-not $parametersObject.bcEnvironment)) {
+        return $parametersObject
+    }       
         
-    foreach ($flowFilePath in $flowFilePaths) {
-        Update-FlowJson -FilePath $flowFilePath -CompanyId $CompanyId -EnvironmentName $EnvironmentName
-    }        
+    # Check if parameters are already set to the correct values
+    if (($parametersObject.company -eq $CompanyId) -and ($parametersObject.bcEnvironment -eq $EnvironmentName)) {
+        Write-Host "No changes needed for: $FilePath"
+        return $parametersObject
+    }
+
+    # Check if parameters are set using a different approach (e.g. environment variables or passed in parameters)
+    if ($parametersObject.company -contains "@parameters('" -or $parametersObject.bcEnvironment -contains "@parameters('") {
+        Write-Host "No changes needed for: $FilePath (parameters are set using a configurable approach)"
+        return $parametersObject
+    }
+
+    Write-Host "Updating: $FilePath"
+    $parametersObject.company = $CompanyId
+    $parametersObject.bcEnvironment = $EnvironmentName
+    return $parametersObject
 }
 
-function Update-PowerApps {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory = $true)]
-        [string]$SolutionFolder,
-        
-        [Parameter(Mandatory = $true)]
-        [string]$EnvironmentName,
-        
-        [Parameter(Mandatory = $true)]
-        [string]$CompanyId
-    )
-
-    Write-Host "Updating PowerApp settings"        
-    $currentPowerAppSettings = getCurrentPowerAppSettings -solutionFolder "$SolutionFolder/CanvasApps"
-    if ($currentPowerAppSettings.Count -eq 0) {
-        Write-Warning "Could not find connections file"
-        throw "Could not find connections file"
-    }
-        
-    $newSettings = "$EnvironmentName,$CompanyId"    
-    foreach ($currentSetting in $currentPowerAppSettings) {
-        if ($currentSetting -eq $newSettings) {
-            Write-Host "No changes needed for: "$currentSetting
-            continue
-        }
-        
-        Write-Host "Updating: "$currentSetting
-        replaceOldSettings -oldSetting $currentSetting -newSetting $newSettings -solutionFolder "$SolutionFolder/CanvasApps"
-    }
-}
-
-Write-Host "Updating Business Central environment and company settings"
-Write-Host "New settings: $EnvironmentName, $CompanyId"
-Update-PowerApps -SolutionFolder $SolutionFolder -EnvironmentName $EnvironmentName -CompanyId $CompanyId
-Update-Flows -SolutionFolder $SolutionFolder -EnvironmentName $EnvironmentName -CompanyId $CompanyId
+Write-Host "Updating the Power Platform solution Business Central connection settings"
+Write-Host "New connections settings: $EnvironmentName, $CompanyId"
+Update-PowerAppSettings -SolutionFolder $SolutionFolder -EnvironmentName $EnvironmentName -CompanyId $CompanyId
+Update-FlowSettings -SolutionFolder $SolutionFolder -EnvironmentName $EnvironmentName -CompanyId $CompanyId

@@ -17,14 +17,15 @@ function Update-VersionNode {
         [Parameter(Position = 1, mandatory = $true)]
         [string] $appRevision,
         [Parameter(Position = 2, mandatory = $true)]
-        [xml] $xml
+        [xml] $xmlFile
     )
 
     if ($appBuild -and $appRevision) {
-        $versionNode = $xml.SelectSingleNode("//Version");
+        $versionNode = $xmlFile.SelectSingleNode("//Version");
         $versionNodeText = $versionNode.'#text';
         
         $versionParts = $versionNodeText.Split('.');
+        # Only update the last two parts of the version number - major and minor version should be set manually
         $newVersionNumber = $versionParts[0] + '.' + $versionParts[1] + '.' + $appBuild + '.' + $appRevision;
 
         Write-Host "New version: "$newVersionNumber;
@@ -40,7 +41,7 @@ function Update-ManagedNode {
         [Parameter(Position = 0, mandatory = $false)]
         [string] $managed,
         [Parameter(Position = 1, mandatory = $true)]
-        [xml] $xml
+        [xml] $xmlFile
     )
     
     $managedValue = "0";
@@ -48,43 +49,15 @@ function Update-ManagedNode {
         $managedValue = "1";
     }
 
-    $nodeWithName = $xml.SelectSingleNode("//Managed");
+    $nodeWithName = $xmlFile.SelectSingleNode("//Managed");
     Write-Host "Updating managed flag: "$managedValue;
     $nodeWithName.'#text' = $managedValue;    
 }
 
-function Update-SolutionFiles {
-    param(
-        [Parameter(Position = 0, mandatory = $true)]
-        [string] $appBuild,
-        [Parameter(Position = 1, mandatory = $true)]
-        [string] $appRevision,
-        [Parameter(Position = 2, mandatory = $false)]
-        [string] $managed,
-        [Parameter(Position = 3, mandatory = $true)]
-        [string[]] $solutionFiles
-    )
-    foreach ($solutionFile in $solutionFiles) {
-        Write-Host "Updating solution: "$solutionFile;
-        $xmlFile = [xml](Get-Content $solutionFile);
+Write-Host "Updating Power Platform solution ($solutionFolder)";
+$xmlFile = [xml](Get-Content $solutionFile);
 
-        Update-VersionNode -appBuild $appBuild -appRevision $appRevision -xml $xmlFile;
-        Update-ManagedNode -managed $managed -xml $xmlFile;
+Update-VersionNode -appBuild $appBuild -appRevision $appRevision -xmlFile $xmlFile;
+Update-ManagedNode -managed $managed -xmlFile $xmlFile;
         
-        $xmlFile.Save($solutionFile);
-    }
-}
-
-function Get-PowerPlatformSolutionFiles {
-    param(
-        [Parameter(Position = 0, mandatory = $true)]
-        [string] $solutionFolder
-    )
-    $solutionFiles = Get-ChildItem -Path $solutionFolder -Filter "solution.xml" -Recurse -File;
-    return $solutionFiles.FullName;
-}
-
-Write-Host "Updating Power Platform solution files";
-# When we use the solution folder we should only get 1 solution file - the script is just written so it can handle multiple solution files in the future
-$solutionFiles = Get-PowerPlatformSolutionFiles -solutionFolder $solutionFolder;
-Update-SolutionFiles -appBuild $appBuild -appRevision $appRevision -managed $managed -solutionFiles $solutionFiles;
+$xmlFile.Save($solutionFile);

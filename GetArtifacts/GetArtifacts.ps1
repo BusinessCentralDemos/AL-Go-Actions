@@ -6,9 +6,7 @@ Param(
     [Parameter(HelpMessage = "Specifies the parent telemetry scope for the telemetry signal", Mandatory = $false)]
     [string] $parentTelemetryScopeJson = '7b7d',
     [Parameter(HelpMessage = "Type of artifacts to download", Mandatory = $true)]
-    [string] $artifactVersion,
-    [Parameter(HelpMessage = "The projects to publish", Mandatory = $false)]
-    [string] $projects
+    [string] $artifactVersion
 )
 
 $ErrorActionPreference = "Stop"
@@ -16,6 +14,8 @@ Set-StrictMode -Version 2.0
 $telemetryScope = $null
 $bcContainerHelperPath = $null
 
+# Get artifacts for all projects
+$projects = "*"
 
 Write-Host "Get artifacts: '$artifactVersion' for these projects: '$projects'"
 # IMPORTANT: No code that can fail should be outside the try/catch

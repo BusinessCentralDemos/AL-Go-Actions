@@ -63,7 +63,7 @@ runs:
         _artifactPath: ${{inputs.artifactPath}}
       shell: ${{ inputs.shell }}
       run: |
-            $artifactFiles = Get-ChildItem -Path $ENV:_artifactsPath -Recurse -File | Select-Object -ExpandProperty FullName
+            $artifactFiles = Get-ChildItem -Path $ENV:_artifactPath -Recurse -File | Select-Object -ExpandProperty FullName
             foreach($filePath in $artifactFiles){
                 ## Find file containing Power Platform keyword
                 if($filePath.contains("-PowerPlatformSolution-")){
@@ -72,8 +72,8 @@ runs:
                     return
                 }
             }            
-            Write-Warning "Not able to find Power Platform solution file in $ENV:_artifactsPath"
-            throw "Not able to find Power Platform solution file in $ENV:_artifactsPath that contains the artifact keyword '-PowerPlatformSolution-'"
+            Write-Warning "Not able to find Power Platform solution file in $ENV:_artifactPath"
+            throw "Not able to find Power Platform solution file in $ENV:_artifactPath that contains the artifact keyword '-PowerPlatformSolution-'"
   
     - name: Unpack solution artifact
       uses: microsoft/powerplatform-actions/unpack-solution@v0

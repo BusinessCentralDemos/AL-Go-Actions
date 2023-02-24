@@ -6,7 +6,9 @@ Param(
     [Parameter(HelpMessage = "Specifies the parent telemetry scope for the telemetry signal", Mandatory = $false)]
     [string] $parentTelemetryScopeJson = '7b7d',
     [Parameter(HelpMessage = "Type of artifacts to download", Mandatory = $true)]
-    [string] $artifactVersion    
+    [string] $artifactVersion,
+    [Parameter(HelpMessage = "The projects to publish", Mandatory = $false)]
+    [string] $projects
 )
 
 $ErrorActionPreference = "Stop"
@@ -14,10 +16,8 @@ Set-StrictMode -Version 2.0
 $telemetryScope = $null
 $bcContainerHelperPath = $null
 
-#TODO: maybe add projects as parameter again 
-$projects = @("*")
 
-Write-Host "Get artifacts: '$artifactVersion' from $ENV:GITHUB_REPOSITORY"
+Write-Host "Get artifacts: '$artifactVersion' for these projects: '$projects'"
 # IMPORTANT: No code that can fail should be outside the try/catch
 
 try {
@@ -53,6 +53,7 @@ try {
         New-Item $artifactsFolder -ItemType Directory | Out-Null
         DownloadRelease -token $token -projects $projects -api_url $ENV:GITHUB_API_URL -repository $ENV:GITHUB_REPOSITORY -release $release -path $artifactsFolder -mask "Apps"
         DownloadRelease -token $token -projects $projects -api_url $ENV:GITHUB_API_URL -repository $ENV:GITHUB_REPOSITORY -release $release -path $artifactsFolder -mask "Dependencies"
+        DownloadRelease -token $token -projects $projects -api_url $ENV:GITHUB_API_URL -repository $ENV:GITHUB_REPOSITORY -release $release -path $artifactsFolder -mask "PowerPlatformsolution"  
         $apps = @((Get-ChildItem -Path $artifactsFolder) | ForEach-Object { $_.FullName })
         
         if (!$apps) {
@@ -64,6 +65,7 @@ try {
         New-Item $artifactsFolder -ItemType Directory | Out-Null
         $allArtifacts = @(GetArtifacts -token $token -api_url $ENV:GITHUB_API_URL -repository $ENV:GITHUB_REPOSITORY -mask "Apps" -projects $projects -Version $artifactVersion -branch "main")
         $allArtifacts += @(GetArtifacts -token $token -api_url $ENV:GITHUB_API_URL -repository $ENV:GITHUB_REPOSITORY -mask "Dependencies" -projects $projects -Version $artifactVersion -branch "main")
+        $allArtifacts += @(GetArtifacts -token $token -api_url $ENV:GITHUB_API_URL -repository $ENV:GITHUB_REPOSITORY -mask "PowerPlatformSolution" -projects $projects -Version $artifactVersion -branch "main")
         if ($allArtifacts) {
             $allArtifacts | ForEach-Object {
                 $appFile = DownloadArtifact -token $token -artifact $_ -path $artifactsFolder

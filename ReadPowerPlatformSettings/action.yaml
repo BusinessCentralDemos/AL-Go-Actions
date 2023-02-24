@@ -26,7 +26,7 @@ runs:
       env:
         _deployToSettings: ${{ inputs.deploySettings }}
         _authContext: ${{ inputs.authSettings }}
-      run: ${{ github.action_path }}/ParseDeploymentAndAuthSettings.ps1 -deployToSettings $ENV:_deployToSettings -authContext $ENV:_authContext
+      run: ${{ github.action_path }}/ReadDeploymentAndAuthSettings.ps1 -deployToSettings $ENV:_deployToSettings -authContext $ENV:_authContext
 
 branding:
   icon: terminal

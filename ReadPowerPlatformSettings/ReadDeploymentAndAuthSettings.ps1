@@ -5,7 +5,7 @@ param(
     [string]$authContext
 )
 
-function ParseDeployToSettings {
+function Read-DeployToSettings {
     param(
         [Parameter(Mandatory=$true)]
         [string]$deployToSettingString
@@ -26,7 +26,7 @@ function ParseDeployToSettings {
     }
 }
 
-function ParseAuthContext {
+function Read-AuthContext {
     param(
         [Parameter(Mandatory=$true)]
         [string]$authContextData
@@ -59,11 +59,11 @@ function ParseAuthContext {
 }
 
 Write-Host "*******************************************************************************************"
-Write-Host "Parse deployment settings"
+Write-Host "Read deployment settings"
 Write-Host "*******************************************************************************************"
-ParseDeployToSettings -deployToSettingString $deployToSettings
+Read-DeployToSettings -deployToSettingString $deployToSettings
 
 Write-Host "*******************************************************************************************"
-Write-Host "Parse authentication context"
+Write-Host "Read authentication context"
 Write-Host "*******************************************************************************************"
-ParseAuthContext -authContextData $authContext
+Read-AuthContext -authContextData $authContext

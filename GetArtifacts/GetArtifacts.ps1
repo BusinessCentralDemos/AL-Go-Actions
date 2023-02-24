@@ -26,7 +26,7 @@ try {
 
     import-module (Join-Path -path $PSScriptRoot -ChildPath "..\TelemetryHelper.psm1" -Resolve)
     $telemetryScope = CreateScope -eventId 'DO0075' -parentTelemetryScopeJson $parentTelemetryScopeJson
-    $artifactVersion = $artifactVersion.Replace('/',([System.IO.Path]::DirectorySeparatorChar)).Replace('\',([System.IO.Path]::DirectorySeparatorChar))
+    $artifactVersion = $artifactVersion.Replace('/', ([System.IO.Path]::DirectorySeparatorChar)).Replace('\', ([System.IO.Path]::DirectorySeparatorChar))
 
     $apps = @()
     $artifactsFolder = Join-Path $ENV:GITHUB_WORKSPACE ".artifacts"
@@ -81,7 +81,21 @@ try {
     }
 
     Write-Host "Arifacts downloaded to $artifactsFolder"
-    TrackTrace -telemetryScope $telemetryScope
+    write-host "unzipping artifacts"
+    # Get the full path of all ZIP files in the artifacts folder
+    $downloadedArtifacts = (Get-ChildItem -Path $artifactsFolder -Filter "*.zip").FullName
+
+    foreach ($artifact in $downloadedArtifacts) {
+        $artifactName = [System.IO.Path]::GetFileNameWithoutExtension($artifact)
+
+        # Create a folder with the same name as the artifact
+        $artifactFolder = Join-Path -Path $artifactsFolder -ChildPath $artifactName
+        New-Item -ItemType Directory -Path $artifactFolder -Force | Out-Null
+
+        Expand-Archive -Path $artifact -DestinationPath $artifactFolder
+        Remove-Item -Path $artifact -Force
+    }
+
 }
 catch {
     OutputError -message "Deploy action failed.$([environment]::Newline)Error: $($_.Exception.Message)$([environment]::Newline)Stacktrace: $($_.scriptStackTrace)"

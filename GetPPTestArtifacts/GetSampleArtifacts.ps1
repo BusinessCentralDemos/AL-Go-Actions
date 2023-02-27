@@ -42,7 +42,7 @@ try {
 
     Get-Artifacts
 
-    Write-Host "Arifacts downloaded to $solutionFolder"
+    Write-Host "Arifacts downloaded"
 }
 catch {
     OutputError -message "Deploy action failed.$([environment]::Newline)Error: $($_.Exception.Message)$([environment]::Newline)Stacktrace: $($_.scriptStackTrace)"

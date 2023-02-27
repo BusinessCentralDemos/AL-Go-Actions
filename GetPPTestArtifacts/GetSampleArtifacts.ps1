@@ -19,15 +19,20 @@ function Get-Artifacts {
     Write-Host "Response: $response"
     $assets = $response.assets
 
-    # Loop through the release assets and download them
-    foreach ($asset in $assets) {
-        $filename = $asset.name
-        write-host "Asset: $filename"
-
-        $url = $asset.browser_download_url
-        Invoke-WebRequest -Uri $url -OutFile $filename
-        ls $filename
+    if ($assets.count -gt 1) {
+        Write-Warning "More than one asset found. Only Downloading the first one."
     }
+
+    if ($assets.count -eq 0) {
+        Write-Error "No solutions found."
+        throw "No solutions found."
+    }
+
+    $asset = $assets[0];
+    $filename = $asset.name
+    write-host "Downloading: $filename"
+    Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $filename
+    Add-Content -Path $env:GITHUB_ENV -Value "bcSampleAppFile=$filename"
 }
 
 $ErrorActionPreference = "Stop"

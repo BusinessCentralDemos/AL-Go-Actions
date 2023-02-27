@@ -14,9 +14,9 @@ function Get-Artifacts {
     # Set the GitHub API token if necessary
     $headers = @{ "Authorization" = $token }
 
+    Write-Host "Getting artifacts from $apiUrl"
     # Call the API endpoint and parse the JSON response
     $response = Invoke-RestMethod -Uri $apiUrl -Headers $headers
-    Write-Host "Response: $response"
     $assets = $response.assets
 
     if ($assets.count -gt 1) {
@@ -29,10 +29,14 @@ function Get-Artifacts {
     }
 
     $asset = $assets[0];
-    $filename = $asset.name
-    write-host "Downloading: $filename"
-    Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $filename
+    $filePath = $asset.name
+    write-host "Downloading: $filePath"
+    Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $filePath
+    Add-Content -Path $env:GITHUB_ENV -Value "bcSampleAppFilePath=$filePath"
+
+    $filename = $filePath.SubString(0, $filePath.Length - 4)
     Add-Content -Path $env:GITHUB_ENV -Value "bcSampleAppFile=$filename"
+
 }
 
 $ErrorActionPreference = "Stop"

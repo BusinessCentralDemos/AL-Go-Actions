@@ -55,7 +55,7 @@ function Update-ManagedNode {
 }
 
 Write-Host "Updating Power Platform solution ($solutionFolder)"
-$solutionFolderPath = $solutionFolder + "other\solution.xml"
+$solutionFolderPath = $solutionFolder + "\other\solution.xml"
 $xmlFile = [xml](Get-Content $solutionFolderPath)
 
 Update-VersionNode -appBuild $appBuild -appRevision $appRevision -xmlFile $xmlFile

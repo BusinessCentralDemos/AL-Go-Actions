@@ -21,10 +21,12 @@ function Get-Artifacts {
 
     # Loop through the release assets and download them
     foreach ($asset in $assets) {
-        write-host "Asset: $asset.name"
-        $url = $asset.browser_download_url
         $filename = $asset.name
+        write-host "Asset: $filename"
+
+        $url = $asset.browser_download_url
         Invoke-WebRequest -Uri $url -OutFile $filename
+        ls $filename
     }
 }
 

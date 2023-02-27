@@ -16,10 +16,12 @@ function Get-Artifacts {
 
     # Call the API endpoint and parse the JSON response
     $response = Invoke-RestMethod -Uri $apiUrl -Headers $headers
+    Write-Host "Response: $response"
     $assets = $response.assets
 
     # Loop through the release assets and download them
     foreach ($asset in $assets) {
+        write-host "Asset: $asset.name"
         $url = $asset.browser_download_url
         $filename = $asset.name
         Invoke-WebRequest -Uri $url -OutFile $filename
@@ -30,9 +32,9 @@ $ErrorActionPreference = "Stop"
 Set-StrictMode -Version 2.0
 $telemetryScope = $null
 
-Write-Host "Get BC sample apps:"
-# IMPORTANT: No code that can fail should be outside the try/catch
+Write-Host "Get BC sample apps"
 
+# IMPORTANT: No code that can fail should be outside the try/catch
 try {
     . (Join-Path -Path $PSScriptRoot -ChildPath "..\AL-Go-Helper.ps1" -Resolve)
     $BcContainerHelperPath = DownloadAndImportBcContainerHelper -baseFolder $ENV:GITHUB_WORKSPACE

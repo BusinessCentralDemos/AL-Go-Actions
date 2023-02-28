@@ -40,10 +40,10 @@ try {
     $artifacts = $artifacts.Replace('/',([System.IO.Path]::DirectorySeparatorChar)).Replace('\',([System.IO.Path]::DirectorySeparatorChar))
 
     $apps = @()
-    $baseFolder = Join-Path $ENV:GITHUB_WORKSPACE ".artifacts"
-    $baseFolderCreated = $false
+    $artifactsFolder = Join-Path $ENV:GITHUB_WORKSPACE ".artifacts"
+    $artifactsFolderCreated = $false
     if ($artifacts -eq ".artifacts") {
-        $artifacts = $baseFolder
+        $artifacts = $artifactsFolder
     }
 
     if ($artifacts -like "$($ENV:GITHUB_WORKSPACE)*") {
@@ -52,10 +52,13 @@ try {
                 $project = $_.Replace('\','_').Replace('/','_')
                 $refname = "$ENV:GITHUB_REF_NAME".Replace('/','_')
                 Write-Host "project '$project'"
-                $apps += @((Get-ChildItem -Path $artifacts -Filter "$project-$refname-Apps-*.*.*.*") | ForEach-Object { $_.FullName })
-                if (!($apps)) {
-                    throw "There is no artifacts present in $artifacts matching $project-$refname-Apps-<version>."
+                $projectApps = @((Get-ChildItem -Path $artifacts -Filter "$project-$refname-Apps-*.*.*.*") | ForEach-Object { $_.FullName })
+                if (!($projectApps)) {
+                    if ($project -ne '*') {
+                        throw "There is no artifacts present in $artifacts matching $project-$refname-Apps-<version>."
+                    }
                 }
+                $apps += $projectApps
                 $apps += @((Get-ChildItem -Path $artifacts -Filter "$project-$refname-Dependencies-*.*.*.*") | ForEach-Object { $_.FullName })
             }
         }
@@ -81,23 +84,23 @@ try {
         if (!($release)) {
             throw "Unable to locate $artifacts release"
         }
-        New-Item $baseFolder -ItemType Directory | Out-Null
-        $baseFolderCreated = $true
-        DownloadRelease -token $token -projects $projects -api_url $ENV:GITHUB_API_URL -repository $ENV:GITHUB_REPOSITORY -release $release -path $baseFolder -mask "Apps"
-        DownloadRelease -token $token -projects $projects -api_url $ENV:GITHUB_API_URL -repository $ENV:GITHUB_REPOSITORY -release $release -path $baseFolder -mask "Dependencies"
-        $apps = @((Get-ChildItem -Path $baseFolder) | ForEach-Object { $_.FullName })
+        New-Item $artifactsFolder -ItemType Directory | Out-Null
+        $artifactsFolderCreated = $true
+        DownloadRelease -token $token -projects $projects -api_url $ENV:GITHUB_API_URL -repository $ENV:GITHUB_REPOSITORY -release $release -path $artifactsFolder -mask "Apps"
+        DownloadRelease -token $token -projects $projects -api_url $ENV:GITHUB_API_URL -repository $ENV:GITHUB_REPOSITORY -release $release -path $artifactsFolder -mask "Dependencies"
+        $apps = @((Get-ChildItem -Path $artifactsFolder) | ForEach-Object { $_.FullName })
         if (!$apps) {
             throw "Artifact $artifacts was not found on any release. Make sure that the artifact files exist and files are not corrupted."
         }
     }
     else {
-        New-Item $baseFolder -ItemType Directory | Out-Null
+        New-Item $artifactsFolder -ItemType Directory | Out-Null
         $baseFolderCreated = $true
         $allArtifacts = @(GetArtifacts -token $token -api_url $ENV:GITHUB_API_URL -repository $ENV:GITHUB_REPOSITORY -mask "Apps" -projects $projects -Version $artifacts -branch "main")
         $allArtifacts += @(GetArtifacts -token $token -api_url $ENV:GITHUB_API_URL -repository $ENV:GITHUB_REPOSITORY -mask "Dependencies" -projects $projects -Version $artifacts -branch "main")
         if ($allArtifacts) {
             $allArtifacts | ForEach-Object {
-                $appFile = DownloadArtifact -token $token -artifact $_ -path $baseFolder
+                $appFile = DownloadArtifact -token $token -artifact $_ -path $artifactsFolder
                 if (!(Test-Path $appFile)) {
                     throw "Unable to download artifact $($_.name)"
                 }
@@ -109,63 +112,65 @@ try {
         }
     }
 
-    Write-Host "Apps to deploy"
-    $apps | Out-Host
+    if ($apps) {
+        Write-Host "Apps to deploy"
+        $apps | Out-Host
 
-    Set-Location $ENV:GITHUB_WORKSPACE
-    if (-not ($ENV:AuthContext)) {
-        throw "An environment secret for environment($environmentName) called AUTHCONTEXT containing authentication information for the environment was not found.You must create an environment secret."
-    }
-    $authContext = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($ENV:AuthContext))
-
-    try {
-        $authContextParams = $authContext | ConvertFrom-Json | ConvertTo-HashTable
-        $bcAuthContext = New-BcAuthContext @authContextParams
-    } catch {
-        throw "Authentication failed. $([environment]::Newline) $($_.exception.message)"
-    }
-
-    $envName = $environmentName.Split(' ')[0]
-    Write-Host "$($bcContainerHelperConfig.baseUrl.TrimEnd('/'))/$($bcAuthContext.tenantId)/$envName/deployment/url"
-    $response = Invoke-RestMethod -UseBasicParsing -Method Get -Uri "$($bcContainerHelperConfig.baseUrl.TrimEnd('/'))/$($bcAuthContext.tenantId)/$envName/deployment/url"
-    if ($response.Status -eq "DoesNotExist") {
-        OutputError -message "Environment with name $envName does not exist in the current authorization context."
-        exit
-    }
-    if ($response.Status -ne "Ready") {
-        OutputError -message "Environment with name $envName is not ready (Status is $($response.Status))."
-        exit
-    }
-
-    try {
-        if ($response.environmentType -eq 1) {
-            if ($bcAuthContext.ClientSecret) {
-                Write-Host "Using S2S, publishing apps using automation API"
-                Publish-PerTenantExtensionApps -bcAuthContext $bcAuthContext -environment $envName -appFiles $apps
+        Set-Location $ENV:GITHUB_WORKSPACE
+        if (-not ($ENV:AuthContext)) {
+            throw "An environment secret for environment($environmentName) called AUTHCONTEXT containing authentication information for the environment was not found.You must create an environment secret."
+        }
+        $authContext = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($ENV:AuthContext))
+    
+        try {
+            $authContextParams = $authContext | ConvertFrom-Json | ConvertTo-HashTable
+            $bcAuthContext = New-BcAuthContext @authContextParams
+        } catch {
+            throw "Authentication failed. $([environment]::Newline) $($_.exception.message)"
+        }
+    
+        $envName = $environmentName.Split(' ')[0]
+        Write-Host "$($bcContainerHelperConfig.baseUrl.TrimEnd('/'))/$($bcAuthContext.tenantId)/$envName/deployment/url"
+        $response = Invoke-RestMethod -UseBasicParsing -Method Get -Uri "$($bcContainerHelperConfig.baseUrl.TrimEnd('/'))/$($bcAuthContext.tenantId)/$envName/deployment/url"
+        if ($response.Status -eq "DoesNotExist") {
+            OutputError -message "Environment with name $envName does not exist in the current authorization context."
+            exit
+        }
+        if ($response.Status -ne "Ready") {
+            OutputError -message "Environment with name $envName is not ready (Status is $($response.Status))."
+            exit
+        }
+    
+        try {
+            if ($response.environmentType -eq 1) {
+                if ($bcAuthContext.ClientSecret) {
+                    Write-Host "Using S2S, publishing apps using automation API"
+                    Publish-PerTenantExtensionApps -bcAuthContext $bcAuthContext -environment $envName -appFiles $apps
+                }
+                else {
+                    Write-Host "Publishing apps using development endpoint"
+                    Publish-BcContainerApp -bcAuthContext $bcAuthContext -environment $envName -appFile $apps -useDevEndpoint -checkAlreadyInstalled
+                }
             }
             else {
-                Write-Host "Publishing apps using development endpoint"
-                Publish-BcContainerApp -bcAuthContext $bcAuthContext -environment $envName -appFile $apps -useDevEndpoint -checkAlreadyInstalled
+                if ($type -eq 'CD') {
+                    Write-Host "Ignoring environment $environmentName, which is a production environment"
+                }
+                else {
+                    # Check for AppSource App - cannot be deployed
+                    Write-Host "Publishing apps using automation API"
+                    Publish-PerTenantExtensionApps -bcAuthContext $bcAuthContext -environment $envName -appFiles $apps
+                }
             }
         }
-        else {
-            if ($type -eq 'CD') {
-                Write-Host "Ignoring environment $environmentName, which is a production environment"
-            }
-            else {
-                # Check for AppSource App - cannot be deployed
-                Write-Host "Publishing apps using automation API"
-                Publish-PerTenantExtensionApps -bcAuthContext $bcAuthContext -environment $envName -appFiles $apps
-            }
+        catch {
+            OutputError -message "Deploying to $environmentName failed.$([environment]::Newline) $($_.Exception.Message)"
+            exit
         }
+    
     }
-    catch {
-        OutputError -message "Deploying to $environmentName failed.$([environment]::Newline) $($_.Exception.Message)"
-        exit
-    }
-
-    if ($baseFolderCreated) {
-        Remove-Item $baseFolder -Recurse -Force
+    if ($artifactsFolderCreated) {
+        Remove-Item $artifactsFolder -Recurse -Force
     }
 
     TrackTrace -telemetryScope $telemetryScope

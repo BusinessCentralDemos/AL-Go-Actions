@@ -72,13 +72,13 @@ try {
         $repoSettings = @{}
     }
     $unusedALGoSystemFiles = @()
-    if ($repoSettings.ContainsKey("unusedALGoSystemFiles")) {
+    if ($repoSettings.Keys -contains "unusedALGoSystemFiles") {
         $unusedALGoSystemFiles = $repoSettings.unusedALGoSystemFiles
     }
 
     # if UpdateSettings is true, we need to update the settings file with the new template url (i.e. there are changes to your AL-Go System files)
     $updateSettings = $true
-    if ($repoSettings.ContainsKey("templateUrl")) {
+    if ($repoSettings.Keys -contains "templateUrl") {
         if ($templateUrl.StartsWith('@')) {
             $templateUrl = "$($repoSettings.templateUrl.Split('@')[0])$templateUrl"
         }
@@ -123,7 +123,7 @@ try {
         @{ "dstPath" = ".github"; "srcPath" = ".github"; "pattern" = "*.copy.md"; "type" = "releasenotes" }
     )
     # Get the list of projects in the current repository
-    if ($repoSettings.ContainsKey('projects')) {
+    if ($repoSettings.Keys -contains 'projects') {
         $projects = $repoSettings.projects
     }
     else {
@@ -146,11 +146,11 @@ try {
     # Dependency depth determines how many build jobs we need to run sequentially
     # Every build job might spin up multiple jobs in parallel to build the projects without unresolved deependencies
     $depth = 1
-    if ($repoSettings.ContainsKey('useProjectDependencies') -and $repoSettings.useProjectDependencies -and $projects.Count -gt 1) {
+    if ($repoSettings.Keys -contains 'useProjectDependencies' -and $repoSettings.useProjectDependencies -and $projects.Count -gt 1) {
         $buildAlso = @{}
         $buildOrder = @{}
         $projectDependencies = @{}
-        AnalyzeProjectDependencies -basePath $baseFolder -projects $projects -buildOrder ([ref]$buildOrder) -buildAlso ([ref]$buildAlso) -projectDependencies ([ref]$projectDependencies)
+        AnalyzeProjectDependencies -baseFolder $baseFolder -projects $projects -buildOrder ([ref]$buildOrder) -buildAlso ([ref]$buildAlso) -projectDependencies ([ref]$projectDependencies)
         $depth = $buildOrder.Count
         Write-Host "Calculated dependency depth to be $depth"
     }
@@ -181,7 +181,7 @@ try {
 
                     # Any workflow (except for the PullRequestHandler) can have a RepoSetting called <workflowname>Schedule, which will be used to set the schedule for the workflow
                     if ($baseName -ne "PullRequestHandler") {
-                        if ($repoSettings.ContainsKey($workflowScheduleKey)) {
+                        if ($repoSettings.Keys -contains $workflowScheduleKey) {
                             # Read the section under the on: key and add the schedule section
                             $yamlOn = $yaml.Get('on:/')
                             $yaml.Replace('on:/', $yamlOn.content+@('schedule:', "  - cron: '$($repoSettings."$workflowScheduleKey")'"))
@@ -191,10 +191,10 @@ try {
                     # The CICD workflow can have a RepoSetting called CICDPushBranches, which will be used to set the branches for the workflow
                     # Setting the CICDSchedule will disable the push trigger for the CI/CD workflow (unless CICDPushBranches is set)
                     if ($baseName -eq "CICD") {
-                        if ($repoSettings.ContainsKey('CICDPushBranches')) {
+                        if ($repoSettings.Keys -contains 'CICDPushBranches') {
                             $CICDPushBranches = $repoSettings.CICDPushBranches
                         }
-                        elseif ($repoSettings.ContainsKey($workflowScheduleKey)) {
+                        elseif ($repoSettings.Keys -contains $workflowScheduleKey) {
                             $CICDPushBranches = ''
                         }
                         else {
@@ -211,7 +211,7 @@ try {
 
                     # The PullRequestHandler workflow can have a RepoSetting called CICDPullRequestBranches, which will be used to set the branches for the workflow
                     if ($baseName -eq "PullRequestHandler") {
-                        if ($repoSettings.ContainsKey('CICDPullRequestBranches')) {
+                        if ($repoSettings.Keys -contains 'CICDPullRequestBranches') {
                             $CICDPullRequestBranches = $repoSettings.CICDPullRequestBranches
                         }
                         else {
@@ -230,22 +230,22 @@ try {
                     # - Update AL-Go System files is needed for changing runs-on - by having non-functioning runners, you might dead-lock yourself
                     # - Pull Request Handler workflow for security reasons
                     if ($baseName -ne "UpdateGitHubGoSystemFiles" -and $baseName -ne "PullRequestHandler") {
-                        if ($repoSettings.ContainsKey("runs-on")) {
+                        if ($repoSettings.Keys -contains "runs-on") {
                             $runson = $repoSettings."runs-on"
                             $yaml.ReplaceAll('runs-on: [ windows-latest ]', "runs-on: [ $runson ]")
-                            if ($runson -like 'ubuntu-*' -and !$repoSettings.ContainsKey("shell")) {
+                            if ($runson -like 'ubuntu-*' -and $repoSettings.Keys -notcontains "shell") {
                                 # Default shell for Ubuntu (Linux) is pwsh
                                 $repoSettings.shell = "pwsh"
                             }
                         }
-                        if ($repoSettings.ContainsKey("shell")) {
+                        if ($repoSettings.Keys -contains "shell") {
                             $yaml.ReplaceAll('shell: powershell', "shell: $($repoSettings."shell")")
                         }
                     }
 
                     # CICD, Current, NextMinor and NextMajor workflows all include a build step.
                     # If the dependency depth is higher than 1, we need to add multiple dependent build jobs to the workflow
-                    if ($baseName -eq 'CICD' -or $baseName -eq 'Current' -or $baseName -eq 'NextMinor' -or $baseName -eq 'NextMajor') {
+                    if ($baseName -eq 'PullRequestHandler' -or $baseName -eq 'CICD' -or $baseName -eq 'Current' -or $baseName -eq 'NextMinor' -or $baseName -eq 'NextMajor') {
                         $yaml.Replace('env:/workflowDepth:',"workflowDepth: $depth")
                         if ($depth -gt 1) {
                             # When there are multiple build jobs, we need to add build job specific project list (and count) to the output of the Initialization job
@@ -270,7 +270,7 @@ try {
                                     # Example (depth 1):
                                     #    needs: [ Initialization ]
                                     #    if: needs.Initialization.outputs.projects1Count > 0
-                                    $if = "if: needs.Initialization.outputs.projects$($_)Count > 0"
+                                    $if = "if: (!failure()) && (!cancelled()) && needs.Initialization.outputs.projects$($_)Count > 0"
                                 }
                                 else {
                                     # Subsequent build jobs needs to have a dependency on all previous build jobs
@@ -286,7 +286,7 @@ try {
                                         $needs += @("Build$_")
                                         $ifpart += " && (needs.Build$_.result == 'success' || needs.Build$_.result == 'skipped')"
                                     }
-                                    $if = "if: always() && (!cancelled())$ifpart && needs.Initialization.outputs.projects$($_)Count > 0"
+                                    $if = "if: (!failure()) && (!cancelled())$ifpart && needs.Initialization.outputs.projects$($_)Count > 0"
                                 }
                                 # Replace the if:, the needs: and the strategy/matrix/project: in the build job with the correct values
                                 $build.Replace('if:', $if)
@@ -378,7 +378,10 @@ try {
 
                 # Set current location to the repository folder
                 Set-Location -Path *
-            
+
+                # checkout branch to update
+                invoke-git checkout $updateBranch
+                
                 # If $directCommit, then changes are made directly to the default branch
                 if (!$directcommit) {
                     # If not direct commit, create a new branch with a random name, and switch to it

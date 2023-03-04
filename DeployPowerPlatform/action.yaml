@@ -45,7 +45,7 @@ runs:
       if: ${{ env.userName != '' }}
       uses: microsoft/powerplatform-actions/who-am-i@v0
       with:
-        environment-url: ${{env.environmentUrl}}
+        environment-url: ${{env.ppEnvironmentUrl}}
         user-name: ${{env.userName}}
         password-secret: ${{env.password}}
 
@@ -53,10 +53,10 @@ runs:
       if: ${{ env.applicationId != '' }}
       uses: microsoft/powerplatform-actions/who-am-i@v0
       with:
-        environment-url: ${{env.environmentUrl}}
+        environment-url: ${{env.ppEnvironmentUrl}}
         tenant-id: ${{env.tenantId}}
-        app-id: ${{env.applicationId}}
-        client-secret: ${{env.clientSecret}}
+        app-id: ${{env.ppApplicationId}}
+        client-secret: ${{env.ppClientSecret}}
 
     - name: Find Power Platform solution file
       env:

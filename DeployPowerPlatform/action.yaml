@@ -91,8 +91,8 @@ runs:
         solutionFolder: .artifacts/tempPPSolution/source
         outputFolder: .artifacts/tempPPSolution
         outputFileName: ppsolution
-        companyId: ${{ env.bcCompanyId }}
-        environmentName: ${{ env.bcEnvironment }}
+        companyId: ${{ env.companyId }}
+        environmentName: ${{ env.environment }}
 
     - name: Publish solution to Power Platform (userName)
       if: ${{ env.userName != '' }}
@@ -100,7 +100,7 @@ runs:
       with:
         user-name: ${{env.userName}}
         password-secret: ${{env.password}}
-        environment-url: ${{env.environmentUrl}}
+        environment-url: ${{env.ppEnvironmentUrl}}
         solution-file: .artifacts/tempPPSolution/ppsolution.zip
         force-overwrite: true
         publish-changes: true
@@ -109,10 +109,10 @@ runs:
       if: ${{ env.applicationId != '' }}
       uses: microsoft/powerplatform-actions/import-solution@v0
       with:
-        environment-url: ${{env.environmentUrl}}
+        environment-url: ${{env.ppEnvironmentUrl}}
         tenant-id: ${{env.tenantId}}
-        app-id: ${{env.applicationId}}
-        client-secret: ${{env.clientSecret}}
+        app-id: ${{env.ppApplicationId}}
+        client-secret: ${{env.ppClientSecret}}
         solution-file: .artifacts/tempPPSolution/ppsolution.zip
         force-overwrite: true
         publish-changes: true

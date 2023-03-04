@@ -39,11 +39,11 @@ function Read-AuthContext {
     if ($authContextObject.userName -and $authContextObject.password) {
         Write-Host "Authenticating with user name and password";
         
-        $userName = $authContextObject.userName
+        $userName = $authContextObject.UserName
         Add-Content -Path $env:GITHUB_ENV -Value "userName=$userName"        
-        $password = $authContextObject.password
+        $password = $authContextObject.Password
         Add-Content -Path $env:GITHUB_ENV -Value "password=$password"
-        $tenantId = $authContextObject.tenantId
+        $tenantId = $authContextObject.TenantID
         Add-Content -Path $env:GITHUB_ENV -Value "tenantId=$tenantId"
 
     } elseif ($authContextObject.applicationId -and $authContextObject.clientSecret) {
@@ -53,7 +53,7 @@ function Read-AuthContext {
         Add-Content -Path $env:GITHUB_ENV -Value "ppApplicationId=$ppApplicationId"        
         $ppClientSecret = $authContextObject.ppClientSecret
         Add-Content -Path $env:GITHUB_ENV -Value "ppClientSecret=$ppClientSecret"
-        $tenantId = $authContextObject.tenantId
+        $tenantId = $authContextObject.TenantID
         Add-Content -Path $env:GITHUB_ENV -Value "tenantId=$tenantId"
 
     } else {

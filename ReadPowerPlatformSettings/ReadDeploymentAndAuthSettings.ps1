@@ -36,7 +36,7 @@ function Read-AuthContext {
     $authContextObject = ConvertFrom-Json $authContextString
 
     # Check which set of properties is present and assign to local variables accordingly
-    if ($authContextObject.userName -and $authContextObject.password) {
+    if ($authContextObject.UserName -and $authContextObject.Password) {
         Write-Host "Authenticating with user name and password";
         
         $userName = $authContextObject.UserName
@@ -46,7 +46,7 @@ function Read-AuthContext {
         $tenantId = $authContextObject.TenantID
         Add-Content -Path $env:GITHUB_ENV -Value "tenantId=$tenantId"
 
-    } elseif ($authContextObject.applicationId -and $authContextObject.clientSecret) {
+    } elseif ($authContextObject.ppApplicationId -and $authContextObject.ppClientSecret) {
         write-host "Authenticating with application ID and client secret";
 
         $ppApplicationId = $authContextObject.ppApplicationId
@@ -58,7 +58,7 @@ function Read-AuthContext {
 
     } else {
         Write-Warning "Invalid input: JSON object must contain either 'userName' and 'password' properties or 'ppApplicationId' and 'ppClientSecret' properties"
-        return;
+        throw "Invalid input: JSON object must contain either 'userName' and 'password' properties or 'ppApplicationId' and 'ppClientSecret' properties"
     }
 }
 

@@ -92,7 +92,7 @@ runs:
         outputFolder: .artifacts/tempPPSolution
         outputFileName: ppsolution
         companyId: ${{ env.companyId }}
-        environmentName: ${{ env.environment }}
+        environmentName: ${{ env.environmentName }}
 
     - name: Publish solution to Power Platform (userName)
       if: env.userName != ''
